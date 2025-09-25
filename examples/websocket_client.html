@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uros Restron WebSocket 客户端</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .message.thing-created {
+            background-color: #d1ecf1;
+        }
+        .message.thing-updated {
+            background-color: #fff3cd;
+        }
+        .message.property-updated {
+            background-color: #d4edda;
+        }
+        .message.status-updated {
+            background-color: #e2e3e5;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        input[type="text"] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Uros Restron WebSocket 客户端</h1>
+    
+    <div class="container">
+        <h3>连接状态</h3>
+        <div id="status" class="status disconnected">未连接</div>
+        <button id="connectBtn" class="btn-primary" onclick="connect()">连接</button>
+        <button id="disconnectBtn" class="btn-danger" onclick="disconnect()" disabled>断开连接</button>
+    </div>
+
+    <div class="container">
+        <h3>订阅设置</h3>
+        <input type="text" id="thingIdInput" placeholder="输入事物ID (可选)" />
+        <button class="btn-success" onclick="subscribe()">订阅特定事物</button>
+        <button class="btn-success" onclick="subscribeAll()">订阅所有事物</button>
+    </div>
+
+    <div class="container">
+        <h3>测试操作</h3>
+        <button class="btn-primary" onclick="createTestThing()">创建测试设备</button>
+        <button class="btn-primary" onclick="updateTestProperty()">更新测试属性</button>
+        <button class="btn-primary" onclick="updateTestStatus()">更新测试状态</button>
+    </div>
+
+    <div class="container">
+        <h3>实时消息</h3>
+        <button class="btn-danger" onclick="clearMessages()">清空消息</button>
+        <div id="messages" class="messages"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentThingId = null;
+
+        function connect() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                alert('已经连接了！');
+                return;
+            }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/api/v1/ws`;
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                updateStatus('已连接', 'connected');
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                addMessage('系统', 'WebSocket 连接已建立', 'system');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message);
+                } catch (e) {
+                    addMessage('错误', '无法解析消息: ' + event.data, 'error');
+                }
+            };
+
+            ws.onclose = function() {
+                updateStatus('连接已断开', 'disconnected');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                addMessage('系统', 'WebSocket 连接已断开', 'system');
+            };
+
+            ws.onerror = function(error) {
+                addMessage('错误', 'WebSocket 错误: ' + error, 'error');
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function subscribe() {
+            const thingId = document.getElementById('thingIdInput').value;
+            if (!thingId) {
+                alert('请输入事物ID');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'subscribe',
+                    data: thingId
+                }));
+                currentThingId = thingId;
+                addMessage('订阅', `已订阅事物: ${thingId}`, 'subscribe');
+            } else {
+                alert('请先连接 WebSocket');
+            }
+        }
+
+        function subscribeAll() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'subscribe',
+                    data: ''
+                }));
+                currentThingId = null;
+                addMessage('订阅', '已订阅所有事物', 'subscribe');
+            } else {
+                alert('请先连接 WebSocket');
+            }
+        }
+
+        function handleMessage(message) {
+            const type = message.type;
+            const data = message.data;
+
+            switch (type) {
+                case 'thing_created':
+                    addMessage('事物创建', `新事物已创建: ${data.name} (${data.id})`, 'thing-created');
+                    break;
+                case 'thing_updated':
+                    addMessage('事物更新', `事物已更新: ${data.name} (${data.id})`, 'thing-updated');
+                    break;
+                case 'thing_deleted':
+                    addMessage('事物删除', `事物已删除: ${data.id}`, 'thing-deleted');
+                    break;
+                case 'property_updated':
+                    addMessage('属性更新', `事物 ${data.thingId} 的属性 ${data.property} 已更新为: ${JSON.stringify(data.value)}`, 'property-updated');
+                    break;
+                case 'status_updated':
+                    addMessage('状态更新', `事物 ${data.thingId} 的状态已更新: ${JSON.stringify(data.status)}`, 'status-updated');
+                    break;
+                default:
+                    addMessage('未知消息', JSON.stringify(message), 'unknown');
+            }
+        }
+
+        function addMessage(type, content, className) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}] ${type}:</strong> ${content}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateStatus(text, className) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = text;
+            statusDiv.className = `status ${className}`;
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        // 测试函数
+        function createTestThing() {
+            fetch('/api/v1/things', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: `测试设备_${Date.now()}`,
+                    type: 'machine',
+                    description: 'WebSocket 测试设备',
+                    properties: [
+                        { name: 'temperature', value: Math.random() * 30 + 10, type: 'number' },
+                        { name: 'humidity', value: Math.random() * 100, type: 'number' }
+                    ],
+                    status: {
+                        online: true,
+                        battery: Math.floor(Math.random() * 100)
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage('API调用', `测试设备创建成功: ${data.name} (${data.id})`, 'api-call');
+            })
+            .catch(error => {
+                addMessage('API错误', `创建测试设备失败: ${error}`, 'error');
+            });
+        }
+
+        function updateTestProperty() {
+            if (!currentThingId) {
+                alert('请先订阅一个事物');
+                return;
+            }
+
+            const newTemp = (Math.random() * 30 + 10).toFixed(1);
+            fetch(`/api/v1/things/${currentThingId}/properties/temperature`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    value: parseFloat(newTemp)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage('API调用', `属性更新成功: temperature = ${newTemp}`, 'api-call');
+            })
+            .catch(error => {
+                addMessage('API错误', `更新属性失败: ${error}`, 'error');
+            });
+        }
+
+        function updateTestStatus() {
+            if (!currentThingId) {
+                alert('请先订阅一个事物');
+                return;
+            }
+
+            const newStatus = {
+                online: true,
+                battery: Math.floor(Math.random() * 100),
+                lastUpdate: new Date().toISOString()
+            };
+
+            fetch(`/api/v1/things/${currentThingId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newStatus)
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage('API调用', `状态更新成功: ${JSON.stringify(newStatus)}`, 'api-call');
+            })
+            .catch(error => {
+                addMessage('API错误', `更新状态失败: ${error}`, 'error');
+            });
+        }
+
+        // 页面加载时自动连接
+        window.onload = function() {
+            // 可以在这里添加自动连接逻辑
+        };
+    </script>
+</body>
+</html>

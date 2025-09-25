@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事物管理 - Uros Restron</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Uros Restron</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">首页</a>
+                <a href="/types" class="nav-link">类型管理</a>
+                <a href="/things" class="nav-link active">事物管理</a>
+                <a href="/graph" class="nav-link">关系图</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>事物实例管理</h2>
+            <button class="btn btn-primary" onclick="showCreateThingModal()">创建新事物</button>
+        </div>
+
+        <div class="filter-bar">
+            <select id="typeFilter" onchange="filterThings()">
+                <option value="">所有类型</option>
+                <option value="person">人员</option>
+                <option value="machine">设备</option>
+                <option value="object">物品</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="搜索事物..." onkeyup="searchThings()">
+        </div>
+
+        <div class="things-grid" id="thingsGrid">
+            <!-- 事物卡片将在这里动态加载 -->
+        </div>
+    </main>
+
+    <!-- 创建事物模态框 -->
+    <div id="createThingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建事物实例</h3>
+                <span class="close" onclick="closeCreateThingModal()">&times;</span>
+            </div>
+            <form id="createThingForm">
+                <div class="form-group">
+                    <label for="thingType">选择类型</label>
+                    <select id="thingType" name="thingTypeId" required onchange="loadTypeSchema()">
+                        <option value="">请选择类型</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="thingName">事物名称</label>
+                    <input type="text" id="thingName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="thingDescription">描述</label>
+                    <textarea id="thingDescription" name="description" rows="3"></textarea>
+                </div>
+                <div id="propertiesContainer">
+                    <!-- 根据选择的类型动态生成属性输入框 -->
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeCreateThingModal()" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 事物详情模态框 -->
+    <div id="thingDetailModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>事物详情</h3>
+                <span class="close" onclick="closeThingDetailModal()">&times;</span>
+            </div>
+            <div id="thingDetailContent">
+                <!-- 事物详情将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/things.js"></script>
+</body>
+</html>

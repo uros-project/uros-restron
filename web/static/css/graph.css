@@ -1,0 +1,258 @@
+/* 关系图页面样式 */
+
+.graph-controls {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-weight: 500;
+    color: #2c3e50;
+    white-space: nowrap;
+}
+
+.control-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    min-width: 120px;
+}
+
+.graph-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.graph-svg {
+    flex: 1;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    min-height: 600px;
+    position: relative;
+}
+
+.graph-legend {
+    width: 200px;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.graph-legend h4 {
+    margin: 0 0 0.8rem 0;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.legend-items {
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.legend-line {
+    width: 20px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+.legend-line.strong {
+    background: #e74c3c;
+    border-top: 2px solid #c0392b;
+}
+
+.legend-line.weak {
+    background: #3498db;
+    border-top: 1px dashed #2980b9;
+}
+
+.legend-node {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ddd;
+}
+
+.legend-node.person {
+    background: #e74c3c;
+}
+
+.legend-node.machine {
+    background: #f39c12;
+}
+
+.legend-node.object {
+    background: #9b59b6;
+}
+
+.graph-info {
+    display: flex;
+    gap: 1rem;
+}
+
+.info-panel {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.info-panel h4 {
+    margin: 0 0 0.8rem 0;
+    color: #2c3e50;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.relationship-details,
+.thing-details {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.relationship-details p,
+.thing-details p {
+    margin: 0;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* D3.js 图形样式 */
+.node {
+    cursor: pointer;
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.node.person {
+    fill: #e74c3c;
+}
+
+.node.machine {
+    fill: #f39c12;
+}
+
+.node.object {
+    fill: #9b59b6;
+}
+
+.node:hover {
+    stroke: #2c3e50;
+    stroke-width: 3px;
+}
+
+.link {
+    fill: none;
+    stroke: #999;
+    stroke-width: 2px;
+    stroke-opacity: 0.6;
+}
+
+.link.strong {
+    stroke: #e74c3c;
+    stroke-width: 3px;
+    stroke-opacity: 0.8;
+}
+
+.link.weak {
+    stroke: #3498db;
+    stroke-width: 1px;
+    stroke-dasharray: 5,5;
+    stroke-opacity: 0.6;
+}
+
+.link:hover {
+    stroke-opacity: 1;
+    stroke-width: 4px;
+}
+
+.node-label {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    fill: #2c3e50;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.link-label {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    fill: #7f8c8d;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+/* 工具提示样式 */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 200px;
+}
+
+.tooltip h5 {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.tooltip p {
+    margin: 2px 0;
+    font-size: 11px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .graph-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .control-group {
+        justify-content: space-between;
+    }
+    
+    .graph-container {
+        flex-direction: column;
+    }
+    
+    .graph-legend {
+        width: 100%;
+        order: -1;
+    }
+    
+    .graph-info {
+        flex-direction: column;
+    }
+}

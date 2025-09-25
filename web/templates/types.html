@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事物类型管理 - Uros Restron</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Uros Restron</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">首页</a>
+                <a href="/types" class="nav-link active">类型管理</a>
+                <a href="/things" class="nav-link">事物管理</a>
+                <a href="/graph" class="nav-link">关系图</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>事物类型管理</h2>
+            <button class="btn btn-primary" onclick="showCreateTypeModal()">创建新类型</button>
+        </div>
+
+        <div class="filter-bar">
+            <select id="categoryFilter" onchange="filterTypes()">
+                <option value="">所有分类</option>
+                <option value="person">人员</option>
+                <option value="machine">设备</option>
+                <option value="object">物品</option>
+            </select>
+        </div>
+
+        <div class="types-grid" id="typesGrid">
+            <!-- 类型卡片将在这里动态加载 -->
+        </div>
+    </main>
+
+    <!-- 创建类型模态框 -->
+    <div id="createTypeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建事物类型</h3>
+                <span class="close" onclick="closeCreateTypeModal()">&times;</span>
+            </div>
+            <form id="createTypeForm">
+                <div class="form-group">
+                    <label for="typeName">类型名称</label>
+                    <input type="text" id="typeName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="typeDescription">描述</label>
+                    <textarea id="typeDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="typeCategory">分类</label>
+                    <select id="typeCategory" name="category" required>
+                        <option value="person">人员</option>
+                        <option value="machine">设备</option>
+                        <option value="object">物品</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>属性模式 (Attributes)</label>
+                    <div id="attributesSchema">
+                        <div class="property-item">
+                            <input type="text" placeholder="属性名" class="property-name">
+                            <select class="property-type">
+                                <option value="string">字符串</option>
+                                <option value="number">数字</option>
+                                <option value="boolean">布尔值</option>
+                            </select>
+                            <button type="button" onclick="removeProperty(this)">删除</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addProperty()" class="btn btn-secondary">添加属性</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>功能定义</label>
+                    <div id="featuresSchema">
+                        <div class="feature-item">
+                            <div class="feature-header">
+                                <input type="text" placeholder="功能名" class="feature-name">
+                                <input type="text" placeholder="功能描述" class="feature-description">
+                                <button type="button" onclick="removeFeature(this)">删除</button>
+                            </div>
+                            <div class="feature-properties">
+                                <label class="feature-properties-label">功能属性:</label>
+                                <div class="feature-property-list">
+                                    <div class="feature-property-item">
+                                        <input type="text" placeholder="属性名" class="feature-property-name">
+                                        <select class="feature-property-type">
+                                            <option value="string">字符串</option>
+                                            <option value="number">数字</option>
+                                            <option value="boolean">布尔值</option>
+                                        </select>
+                                        <button type="button" onclick="removeFeatureProperty(this)">删除</button>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="addFeatureProperty(this)" class="btn btn-small">添加属性</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addFeature()" class="btn btn-secondary">添加功能</button>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeCreateTypeModal()" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/types.js"></script>
+</body>
+</html>

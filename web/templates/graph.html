@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字孪生关系图 - Uros Restron</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/graph.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Uros Restron</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">首页</a>
+                <a href="/types" class="nav-link">类型管理</a>
+                <a href="/things" class="nav-link">事物管理</a>
+                <a href="/graph" class="nav-link active">关系图</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>数字孪生关系图</h2>
+        </div>
+
+        <div class="graph-controls">
+            <div class="control-group">
+                <label for="relationshipType">关系类型筛选:</label>
+                <select id="relationshipType">
+                    <option value="">全部关系</option>
+                    <option value="contains">包含关系</option>
+                    <option value="composes">组合关系</option>
+                    <option value="owns">拥有关系</option>
+                    <option value="relates_to">关联关系</option>
+                    <option value="depends_on">依赖关系</option>
+                    <option value="influences">影响关系</option>
+                    <option value="collaborates">协作关系</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="thingType">事物类型筛选:</label>
+                <select id="thingType">
+                    <option value="">全部类型</option>
+                    <option value="person">人员</option>
+                    <option value="machine">设备</option>
+                    <option value="object">物品</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button id="refreshGraph" class="btn btn-primary">刷新图形</button>
+                <button id="resetView" class="btn btn-secondary">重置视图</button>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <div id="graph" class="graph-svg"></div>
+            <div class="graph-legend">
+                    <h4>关系类型图例</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-line strong"></div>
+                            <span>强关联 (包含/组合/拥有)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-line weak"></div>
+                            <span>弱关联 (关联/依赖/影响/协作)</span>
+                        </div>
+                    </div>
+                    <h4>事物类型图例</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-node person"></div>
+                            <span>人员</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-node machine"></div>
+                            <span>设备</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-node object"></div>
+                            <span>物品</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="graph-info">
+                <div class="info-panel">
+                    <h4>关系详情</h4>
+                    <div id="relationshipDetails" class="relationship-details">
+                        <p>点击关系线查看详情</p>
+                    </div>
+                </div>
+                <div class="info-panel">
+                    <h4>事物详情</h4>
+                    <div id="thingDetails" class="thing-details">
+                        <p>点击节点查看详情</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/graph.js"></script>
+</body>
+</html>
