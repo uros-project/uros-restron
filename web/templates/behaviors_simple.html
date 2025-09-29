@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行为管理 - Uros Restron</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>Uros Restron</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/types" class="nav-link">类型管理</a>
+            <a href="/things" class="nav-link">事物管理</a>
+            <a href="/behaviors" class="nav-link active">行为管理</a>
+            <a href="/graph" class="nav-link">关系图</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>行为管理</h2>
+            <p>管理数字孪生对象的行为模式和Actor系统</p>
+        </div>
+
+        <div class="actions">
+            <button id="loadBehaviors" class="btn btn-primary">加载行为</button>
+            <button id="testButton" class="btn btn-secondary" onclick="testFunction()">测试按钮</button>
+        </div>
+
+        <div id="behaviorsList" class="behaviors-list">
+            <!-- 行为列表将在这里动态加载 -->
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Uros Restron. 数字孪生平台</p>
+    </footer>
+
+    <script src="/static/js/behaviors.js"></script>
+</body>
+</html>
+

@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"bytes"
@@ -17,8 +17,8 @@ type Thing struct {
 	Description string                 `json:"description"`
 	Properties  []Property             `json:"properties"`
 	Status      map[string]interface{} `json:"status"`
-	CreatedAt   time.Time             `json:"createdAt"`
-	UpdatedAt   time.Time             `json:"updatedAt"`
+	CreatedAt   time.Time              `json:"createdAt"`
+	UpdatedAt   time.Time              `json:"updatedAt"`
 }
 
 type Property struct {
@@ -150,7 +150,7 @@ func (c *DittoClient) UpdateStatus(thingID string, status map[string]interface{}
 	return nil
 }
 
-func main() {
+func RunClientExample() {
 	// 创建客户端
 	client := NewDittoClient("http://localhost:8080")
 
@@ -212,9 +212,9 @@ func main() {
 	// 示例4: 更新设备状态
 	fmt.Println("\n=== 更新设备状态 ===")
 	newStatus := map[string]interface{}{
-		"online": true,
-		"power":  "on",
-		"mode":   "auto",
+		"online":   true,
+		"power":    "on",
+		"mode":     "auto",
 		"fanSpeed": "medium",
 	}
 	err = client.UpdateStatus(createdDevice.ID, newStatus)

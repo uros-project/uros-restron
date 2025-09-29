@@ -1,0 +1,223 @@
+{
+  "id": "container-001",
+  "name": "智能存储行为",
+  "type": "container",
+  "description": "管理存储空间和物品",
+  "category": "object",
+  "functions": {
+    "manage_storage": {
+      "name": "管理存储",
+      "description": "管理存储空间和物品",
+      "input_params": {
+        "operation": {
+          "type": "string",
+          "description": "操作类型",
+          "required": true,
+          "enum": ["add_item", "remove_item", "check_capacity", "optimize_space"]
+        },
+        "item": {
+          "type": "object",
+          "description": "物品信息",
+          "required": false,
+          "properties": {
+            "id": "string",
+            "name": "string",
+            "size": "number",
+            "category": "string",
+            "expiry_date": "string"
+          }
+        },
+        "storage_id": {
+          "type": "string",
+          "description": "存储容器ID",
+          "required": true
+        }
+      },
+      "output_params": {
+        "success": {
+          "type": "boolean",
+          "description": "操作是否成功"
+        },
+        "capacity": {
+          "type": "object",
+          "description": "存储容量信息",
+          "properties": {
+            "used": "number",
+            "total": "number",
+            "available": "number",
+            "percentage": "number"
+          }
+        },
+        "items": {
+          "type": "array",
+          "description": "存储的物品列表",
+          "items": "object"
+        },
+        "recommendations": {
+          "type": "array",
+          "description": "优化建议",
+          "items": "string"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "validate_operation",
+            "description": "验证操作有效性"
+          },
+          {
+            "step": 2,
+            "action": "check_capacity",
+            "description": "检查存储容量"
+          },
+          {
+            "step": 3,
+            "action": "execute_operation",
+            "description": "执行存储操作"
+          },
+          {
+            "step": 4,
+            "action": "update_inventory",
+            "description": "更新库存信息"
+          },
+          {
+            "step": 5,
+            "action": "generate_recommendations",
+            "description": "生成优化建议"
+          }
+        ]
+      }
+    },
+    "find_item": {
+      "name": "查找物品",
+      "description": "在存储容器中查找特定物品",
+      "input_params": {
+        "item_id": {
+          "type": "string",
+          "description": "物品ID",
+          "required": false
+        },
+        "item_name": {
+          "type": "string",
+          "description": "物品名称",
+          "required": false
+        },
+        "category": {
+          "type": "string",
+          "description": "物品分类",
+          "required": false
+        },
+        "storage_id": {
+          "type": "string",
+          "description": "存储容器ID",
+          "required": true
+        }
+      },
+      "output_params": {
+        "items": {
+          "type": "array",
+          "description": "找到的物品列表",
+          "items": "object"
+        },
+        "total_count": {
+          "type": "number",
+          "description": "找到的物品总数"
+        },
+        "search_time": {
+          "type": "number",
+          "description": "搜索耗时（毫秒）"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "build_search_query",
+            "description": "构建搜索查询"
+          },
+          {
+            "step": 2,
+            "action": "search_inventory",
+            "description": "在库存中搜索"
+          },
+          {
+            "step": 3,
+            "action": "filter_results",
+            "description": "过滤搜索结果"
+          },
+          {
+            "step": 4,
+            "action": "format_results",
+            "description": "格式化搜索结果"
+          }
+        ]
+      }
+    },
+    "optimize_storage": {
+      "name": "优化存储",
+      "description": "优化存储空间布局和物品排列",
+      "input_params": {
+        "storage_id": {
+          "type": "string",
+          "description": "存储容器ID",
+          "required": true
+        },
+        "optimization_type": {
+          "type": "string",
+          "description": "优化类型",
+          "required": false,
+          "enum": ["space", "access", "category", "expiry"]
+        }
+      },
+      "output_params": {
+        "success": {
+          "type": "boolean",
+          "description": "优化是否成功"
+        },
+        "space_saved": {
+          "type": "number",
+          "description": "节省的空间（百分比）"
+        },
+        "recommendations": {
+          "type": "array",
+          "description": "优化建议",
+          "items": "string"
+        },
+        "new_layout": {
+          "type": "object",
+          "description": "新的存储布局"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "analyze_current_layout",
+            "description": "分析当前布局"
+          },
+          {
+            "step": 2,
+            "action": "identify_optimization_opportunities",
+            "description": "识别优化机会"
+          },
+          {
+            "step": 3,
+            "action": "generate_optimization_plan",
+            "description": "生成优化计划"
+          },
+          {
+            "step": 4,
+            "action": "apply_optimization",
+            "description": "应用优化"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "auto_organize": true,
+    "track_items": true,
+    "notifications": ["capacity", "maintenance"]
+  }
+}

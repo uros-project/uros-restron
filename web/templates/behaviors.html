@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行为管理 - Uros Restron</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+    <style>
+        .behavior-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .behavior-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .behavior-header h3 {
+            margin: 0;
+            color: #333;
+        }
+        .behavior-type {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .behavior-description {
+            color: #666;
+            margin: 8px 0;
+        }
+        .behavior-meta {
+            display: flex;
+            gap: 16px;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+        .behavior-status.active {
+            color: #28a745;
+        }
+        .behavior-status.inactive {
+            color: #dc3545;
+        }
+        .behavior-actions {
+            margin-top: 12px;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .tab-btn.active {
+            background: #007bff;
+            color: white;
+        }
+        .filters {
+            margin: 16px 0;
+            display: flex;
+            gap: 16px;
+        }
+        .filters select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>Uros Restron</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/types" class="nav-link">类型管理</a>
+            <a href="/things" class="nav-link">事物管理</a>
+            <a href="/behaviors" class="nav-link active">行为管理</a>
+            <a href="/graph" class="nav-link">关系图</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>行为管理</h2>
+            <p>管理数字孪生对象的行为模式和Actor系统</p>
+        </div>
+
+        <div class="actions">
+            <button id="loadBehaviors" class="btn btn-primary">加载行为</button>
+            <button id="seedBehaviors" class="btn btn-secondary">填充预定义行为</button>
+            <button id="refreshActors" class="btn btn-secondary">刷新Actor状态</button>
+            <button id="testButton" class="btn btn-secondary" onclick="testFunction()">测试按钮</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="behaviors">行为列表</button>
+            <button class="tab-btn" data-tab="actors">Actor状态</button>
+            <button class="tab-btn" data-tab="functions">函数调用</button>
+        </div>
+
+        <!-- 行为列表标签页 -->
+        <div id="behaviors" class="tab-content active">
+            <div class="filters">
+                <select id="categoryFilter">
+                    <option value="">所有分类</option>
+                    <option value="device">设备</option>
+                    <option value="person">人员</option>
+                    <option value="object">对象</option>
+                </select>
+                <select id="typeFilter">
+                    <option value="">所有类型</option>
+                    <option value="purifier">空气净化</option>
+                    <option value="sensor">环境监测</option>
+                    <option value="container">智能存储</option>
+                    <option value="user">用户交互</option>
+                </select>
+            </div>
+
+            <div id="behaviorsList" class="behaviors-list">
+                <!-- 行为列表将在这里动态加载 -->
+                <p>测试内容 - behaviorsList元素存在</p>
+            </div>
+        </div>
+
+        <!-- Actor状态标签页 -->
+        <div id="actors" class="tab-content">
+            <div id="actorsList" class="actors-list">
+                <!-- Actor状态列表将在这里动态加载 -->
+            </div>
+        </div>
+
+        <!-- 函数调用标签页 -->
+        <div id="functions" class="tab-content">
+            <div class="function-call-form">
+                <h3>调用Actor函数</h3>
+                <div class="form-group">
+                    <label for="actorSelect">选择Actor:</label>
+                    <select id="actorSelect">
+                        <option value="">请选择Actor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="functionSelect">选择函数:</label>
+                    <select id="functionSelect">
+                        <option value="">请选择函数</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="parameters">参数 (JSON格式):</label>
+                    <textarea id="parameters" placeholder='{"param1": "value1", "param2": "value2"}'></textarea>
+                </div>
+                <button id="callFunction" class="btn btn-primary">调用函数</button>
+            </div>
+            
+            <div id="functionResult" class="function-result">
+                <!-- 函数调用结果将在这里显示 -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Uros Restron. 数字孪生平台</p>
+    </footer>
+
+    <script src="/static/js/behaviors.js"></script>
+</body>
+</html>

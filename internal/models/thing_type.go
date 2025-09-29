@@ -8,16 +8,19 @@ import (
 	"gorm.io/gorm"
 )
 
+
 // ThingType 表示事物类型定义 - 符合 Ditto 标准
 type ThingType struct {
 	ID             string                      `json:"id" gorm:"primaryKey"`
 	Name           string                      `json:"name"`
 	Description    string                      `json:"description"`
-	Category       string                      `json:"category"`                             // person, machine, object
-	Attributes     map[string]interface{}      `json:"attributes" gorm:"-"`                  // 属性模式定义，不存储到数据库
-	AttributesJSON string                      `json:"-" gorm:"column:attributes;type:text"` // 数据库存储的 JSON 字符串
-	Features       map[string]ThingTypeFeature `json:"features" gorm:"-"`                    // 功能模式定义，不存储到数据库
-	FeaturesJSON   string                      `json:"-" gorm:"column:features;type:text"`   // 数据库存储的 JSON 字符串
+	Category       string                      `json:"category"`                                         // person, machine, object
+	Attributes     map[string]interface{}      `json:"attributes" gorm:"-"`                              // 属性模式定义，不存储到数据库
+	AttributesJSON string                      `json:"-" gorm:"column:attributes;type:text"`             // 数据库存储的 JSON 字符串
+	Features       map[string]interface{}      `json:"features" gorm:"-"`                                // 功能模式定义，不存储到数据库
+	FeaturesJSON   string                      `json:"-" gorm:"column:features;type:text"`               // 数据库存储的 JSON 字符串
+	BehaviorID     string                      `json:"behaviorId"`                                          // 关联的行为ID
+	Behavior       *Behavior                   `json:"behavior,omitempty" gorm:"foreignKey:BehaviorID"` // 关联的行为
 	CreatedAt      time.Time                   `json:"createdAt"`
 	UpdatedAt      time.Time                   `json:"updatedAt"`
 }
@@ -75,10 +78,6 @@ func (t *ThingType) deserializeData() error {
 	return nil
 }
 
-// ThingTypeFeature 表示事物类型的功能定义 - 符合 Ditto 标准
-type ThingTypeFeature struct {
-	Properties map[string]interface{} `json:"properties"` // 功能的属性模式定义
-}
 
 // ThingTypeService 提供事物类型相关的业务逻辑
 type ThingTypeService struct {
@@ -189,7 +188,7 @@ func (s *ThingTypeService) DeleteThingType(id string) error {
 }
 
 // CreateThingFromType 根据类型创建事物实例
-func (s *ThingTypeService) CreateThingFromType(thingTypeID string, name, description string, attributes map[string]interface{}, features map[string]Feature) (*Thing, error) {
+func (s *ThingTypeService) CreateThingFromType(thingTypeID string, name, description string, attributes map[string]interface{}, features map[string]interface{}) (*Thing, error) {
 	// 获取类型定义
 	thingType, err := s.GetThingType(thingTypeID)
 	if err != nil {
@@ -203,7 +202,7 @@ func (s *ThingTypeService) CreateThingFromType(thingTypeID string, name, descrip
 		Type:        thingType.Category,
 		Description: description,
 		Attributes:  make(map[string]interface{}),
-		Features:    make(map[string]Feature),
+		Features:    make(map[string]interface{}),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -219,9 +218,7 @@ func (s *ThingTypeService) CreateThingFromType(thingTypeID string, name, descrip
 	} else {
 		// 根据类型功能创建功能
 		for featureName := range thingType.Features {
-			thing.Features[featureName] = Feature{
-				Properties: make(map[string]interface{}),
-			}
+			thing.Features[featureName] = make(map[string]interface{})
 		}
 	}
 
@@ -244,3 +241,40 @@ func (s *ThingTypeService) CreateThingFromType(thingTypeID string, name, descrip
 
 	return thing, nil
 }
+
+// AssignDefaultBehavior 为 ThingType 分配默认行为
+func (s *ThingTypeService) AssignDefaultBehavior(thingTypeID string) error {
+	var thingType ThingType
+	if err := s.db.First(&thingType, "id = ?", thingTypeID).Error; err != nil {
+		return err
+	}
+
+	// 根据分类获取对应的行为
+	var behavior Behavior
+	if err := s.db.Where("category = ?", thingType.Category).First(&behavior).Error; err != nil {
+		return err
+	}
+
+	// 分配行为
+	return s.db.Model(&thingType).Update("behavior_id", behavior.ID).Error
+}
+
+// SetBehaviorToType 为 ThingType 设置行为
+func (s *ThingTypeService) SetBehaviorToType(thingTypeID, behaviorID string) error {
+	return s.db.Model(&ThingType{}).Where("id = ?", thingTypeID).Update("behavior_id", behaviorID).Error
+}
+
+// RemoveBehaviorFromType 从 ThingType 移除行为
+func (s *ThingTypeService) RemoveBehaviorFromType(thingTypeID string) error {
+	return s.db.Model(&ThingType{}).Where("id = ?", thingTypeID).Update("behavior_id", nil).Error
+}
+
+// GetTypeBehavior 获取 ThingType 的行为
+func (s *ThingTypeService) GetTypeBehavior(thingTypeID string) (*Behavior, error) {
+	var thingType ThingType
+	if err := s.db.Preload("Behavior").First(&thingType, "id = ?", thingTypeID).Error; err != nil {
+		return nil, err
+	}
+	return thingType.Behavior, nil
+}
+

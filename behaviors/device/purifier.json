@@ -1,0 +1,158 @@
+{
+  "id": "purifier-001",
+  "name": "空气净化行为",
+  "type": "purifier",
+  "description": "执行空气净化功能",
+  "category": "device",
+  "functions": {
+    "purify_air": {
+      "name": "净化空气",
+      "description": "执行空气净化操作",
+      "input_params": {
+        "air_quality": {
+          "type": "number",
+          "description": "当前空气质量指数",
+          "required": true,
+          "min": 0,
+          "max": 500
+        },
+        "target_quality": {
+          "type": "number",
+          "description": "目标空气质量指数",
+          "required": false,
+          "default": 50
+        }
+      },
+      "output_params": {
+        "success": {
+          "type": "boolean",
+          "description": "净化操作是否成功"
+        },
+        "final_quality": {
+          "type": "number",
+          "description": "净化后的空气质量指数"
+        },
+        "duration": {
+          "type": "number",
+          "description": "净化持续时间（秒）"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "check_air_quality",
+            "description": "检查当前空气质量"
+          },
+          {
+            "step": 2,
+            "action": "start_fan",
+            "description": "启动风扇",
+            "condition": "air_quality > target_quality"
+          },
+          {
+            "step": 3,
+            "action": "activate_filter",
+            "description": "激活过滤器"
+          },
+          {
+            "step": 4,
+            "action": "monitor_progress",
+            "description": "监控净化进度"
+          }
+        ]
+      }
+    },
+    "check_filter_status": {
+      "name": "检查过滤器状态",
+      "description": "检查空气净化器过滤器状态",
+      "input_params": {
+        "filter_id": {
+          "type": "string",
+          "description": "过滤器ID",
+          "required": true
+        }
+      },
+      "output_params": {
+        "status": {
+          "type": "string",
+          "description": "过滤器状态",
+          "enum": ["good", "replace_soon", "replace_now"]
+        },
+        "usage_hours": {
+          "type": "number",
+          "description": "已使用小时数"
+        },
+        "remaining_life": {
+          "type": "number",
+          "description": "剩余寿命百分比"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "read_filter_sensor",
+            "description": "读取过滤器传感器数据"
+          },
+          {
+            "step": 2,
+            "action": "calculate_usage",
+            "description": "计算使用时间"
+          },
+          {
+            "step": 3,
+            "action": "determine_status",
+            "description": "确定过滤器状态"
+          }
+        ]
+      }
+    },
+    "set_fan_speed": {
+      "name": "设置风扇速度",
+      "description": "设置空气净化器风扇速度",
+      "input_params": {
+        "speed": {
+          "type": "string",
+          "description": "风扇速度",
+          "required": true,
+          "enum": ["low", "medium", "high", "auto"]
+        }
+      },
+      "output_params": {
+        "success": {
+          "type": "boolean",
+          "description": "设置是否成功"
+        },
+        "current_speed": {
+          "type": "string",
+          "description": "当前风扇速度"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "validate_speed",
+            "description": "验证速度设置"
+          },
+          {
+            "step": 2,
+            "action": "set_motor_speed",
+            "description": "设置电机速度"
+          },
+          {
+            "step": 3,
+            "action": "confirm_speed",
+            "description": "确认速度设置"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "fan_speed": "auto",
+    "filter_type": "hepa",
+    "auto_mode": true
+  }
+}

@@ -4,132 +4,127 @@ import (
 	"net/http"
 	"strconv"
 	"uros-restron/internal/models"
+	"uros-restron/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-// 关系管理相关处理器
+// RelationshipHandler 关系处理器
+type RelationshipHandler struct {
+	relationshipService *models.RelationshipService
+	hub                 *Hub
+}
 
-// listRelationships 获取关系列表
-func (s *Server) listRelationships(c *gin.Context) {
-	sourceID := c.Query("source_id")
-	targetID := c.Query("target_id")
+// NewRelationshipHandler 创建新的关系处理器
+func NewRelationshipHandler(relationshipService *models.RelationshipService, hub *Hub) *RelationshipHandler {
+	return &RelationshipHandler{
+		relationshipService: relationshipService,
+		hub:                 hub,
+	}
+}
+
+// ListRelationships 获取关系列表
+func (h *RelationshipHandler) ListRelationships(c *gin.Context) {
 	relationshipType := c.Query("type")
-	limitStr := c.DefaultQuery("limit", "10")
+	limitStr := c.DefaultQuery("limit", "20")
 	offsetStr := c.DefaultQuery("offset", "0")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit parameter"})
+		utils.ValidationErrorResponse(c, "Invalid limit parameter")
 		return
 	}
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset parameter"})
+		utils.ValidationErrorResponse(c, "Invalid offset parameter")
 		return
 	}
 
-	relationships, err := s.relationshipService.ListRelationships(sourceID, targetID, models.RelationshipType(relationshipType), limit, offset)
+	relationships, err := h.relationshipService.ListRelationships(relationshipType, "", "", limit, offset)
 	if err != nil {
-		logrus.Error("Failed to list relationships:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list relationships"})
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to list relationships")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	utils.RespondWithData(c, gin.H{
 		"data":  relationships,
 		"count": len(relationships),
 	})
 }
 
-// createRelationship 创建关系
-func (s *Server) createRelationship(c *gin.Context) {
+// CreateRelationship 创建关系
+func (h *RelationshipHandler) CreateRelationship(c *gin.Context) {
 	var relationship models.Relationship
 	if err := c.ShouldBindJSON(&relationship); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ValidationErrorResponse(c, err.Error())
 		return
 	}
 
-	if err := s.relationshipService.CreateRelationship(&relationship); err != nil {
+	if err := h.relationshipService.CreateRelationship(&relationship); err != nil {
 		logrus.Error("Failed to create relationship:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create relationship"})
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to create relationship")
 		return
 	}
 
-	c.JSON(http.StatusCreated, relationship)
+	utils.RespondWithDataStatus(c, relationship, http.StatusCreated)
 }
 
-// getRelationship 获取单个关系
-func (s *Server) getRelationship(c *gin.Context) {
+// GetRelationship 获取单个关系
+func (h *RelationshipHandler) GetRelationship(c *gin.Context) {
 	id := c.Param("id")
-	relationship, err := s.relationshipService.GetRelationship(id)
+
+	relationship, err := h.relationshipService.GetRelationship(id)
 	if err != nil {
-		logrus.Error("Failed to get relationship:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get relationship"})
+		utils.RespondWithError(c, http.StatusNotFound, "Relationship not found")
 		return
 	}
 
-	if relationship == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Relationship not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, relationship)
+	utils.RespondWithData(c, relationship)
 }
 
-// updateRelationship 更新关系
-func (s *Server) updateRelationship(c *gin.Context) {
+// UpdateRelationship 更新关系
+func (h *RelationshipHandler) UpdateRelationship(c *gin.Context) {
 	id := c.Param("id")
+
 	var updates map[string]interface{}
 	if err := c.ShouldBindJSON(&updates); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.ValidationErrorResponse(c, err.Error())
 		return
 	}
 
-	if err := s.relationshipService.UpdateRelationship(id, updates); err != nil {
+	if err := h.relationshipService.UpdateRelationship(id, updates); err != nil {
 		logrus.Error("Failed to update relationship:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update relationship"})
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to update relationship")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Relationship updated successfully"})
-}
-
-// deleteRelationship 删除关系
-func (s *Server) deleteRelationship(c *gin.Context) {
-	id := c.Param("id")
-	if err := s.relationshipService.DeleteRelationship(id); err != nil {
-		logrus.Error("Failed to delete relationship:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete relationship"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Relationship deleted successfully"})
-}
-
-// getThingRelationships 获取事物的所有关系
-func (s *Server) getThingRelationships(c *gin.Context) {
-	thingID := c.Param("id")
-	relationships, err := s.relationshipService.GetThingRelationships(thingID)
+	// 获取更新后的数据
+	relationship, err := h.relationshipService.GetRelationship(id)
 	if err != nil {
-		logrus.Error("Failed to get thing relationships:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get thing relationships"})
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to get updated relationship")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":  relationships,
-		"count": len(relationships),
-	})
+	utils.RespondWithData(c, relationship)
 }
 
-// getRelationshipTypes 获取关系类型列表
-func (s *Server) getRelationshipTypes(c *gin.Context) {
-	types := s.relationshipService.GetRelationshipTypes()
-	c.JSON(http.StatusOK, gin.H{
-		"data":  types,
-		"count": len(types),
-	})
+// DeleteRelationship 删除关系
+func (h *RelationshipHandler) DeleteRelationship(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := h.relationshipService.DeleteRelationship(id); err != nil {
+		logrus.Error("Failed to delete relationship:", err)
+		utils.RespondWithError(c, http.StatusInternalServerError, "Failed to delete relationship")
+		return
+	}
+
+	utils.RespondWithData(c, gin.H{"message": "Relationship deleted successfully"})
+}
+
+// GetRelationshipTypes 获取关系类型
+func (h *RelationshipHandler) GetRelationshipTypes(c *gin.Context) {
+	types := h.relationshipService.GetRelationshipTypes()
+	utils.RespondWithData(c, types)
 }

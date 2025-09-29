@@ -77,3 +77,43 @@ func ValidationErrorResponse(c *gin.Context, message string) {
 func NotFoundResponse(c *gin.Context, resource string) {
 	ErrorResponse(c, http.StatusNotFound, resource+" not found")
 }
+
+// SuccessMessageResponse 成功消息响应
+func SuccessMessageResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusOK, Response{
+		Success: true,
+		Message: message,
+	})
+}
+
+// InternalServerErrorResponse 内部服务器错误响应
+func InternalServerErrorResponse(c *gin.Context, message string) {
+	ErrorResponse(c, http.StatusInternalServerError, message)
+}
+
+// RespondWithError 响应错误
+func RespondWithError(c *gin.Context, statusCode int, message string) {
+	ErrorResponse(c, statusCode, message)
+}
+
+// RespondWithJSON 响应JSON数据
+func RespondWithJSON(c *gin.Context, statusCode int, data interface{}) {
+	c.JSON(statusCode, data)
+}
+
+// RespondWithData 响应数据（默认状态码200）
+func RespondWithData(c *gin.Context, data interface{}) {
+	SuccessResponse(c, data)
+}
+
+// RespondWithDataStatus 响应数据（指定状态码）
+func RespondWithDataStatus(c *gin.Context, data interface{}, statusCode int) {
+	if statusCode == http.StatusCreated {
+		CreatedResponse(c, data)
+	} else {
+		c.JSON(statusCode, Response{
+			Success: true,
+			Data:    data,
+		})
+	}
+}

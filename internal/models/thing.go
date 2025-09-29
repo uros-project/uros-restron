@@ -16,27 +16,17 @@ type Thing struct {
 	Name           string                 `json:"name"`
 	Type           string                 `json:"type"` // person, machine, object
 	Description    string                 `json:"description"`
-	Attributes     map[string]interface{} `json:"attributes" gorm:"-"`                  // 静态元数据，不存储到数据库
-	AttributesJSON string                 `json:"-" gorm:"column:attributes;type:text"` // 存储为 JSON 字符串
-	Features       map[string]Feature     `json:"features" gorm:"-"`                    // 动态功能，不存储到数据库
-	FeaturesJSON   string                 `json:"-" gorm:"column:features;type:text"`   // 存储为 JSON 字符串
+	Attributes     map[string]interface{} `json:"attributes" gorm:"-"`                         // 静态元数据，不存储到数据库
+	AttributesJSON string                 `json:"-" gorm:"column:attributes;type:text"`        // 存储为 JSON 字符串
+	Features       map[string]interface{} `json:"features" gorm:"-"`                           // 动态功能，不存储到数据库
+	FeaturesJSON   string                 `json:"-" gorm:"column:features;type:text"`          // 存储为 JSON 字符串
+	BehaviorID     string                 `json:"behaviorId"`                                  // 关联的行为ID
+	Behavior       *Behavior              `json:"behavior,omitempty" gorm:"foreignKey:BehaviorID"` // 关联的行为
 	CreatedAt      time.Time              `json:"createdAt"`
 	UpdatedAt      time.Time              `json:"updatedAt"`
 }
 
-// Property 表示事物的属性
-type Property struct {
-	ID      string      `json:"id" gorm:"primaryKey"`
-	ThingID string      `json:"thingId"`
-	Name    string      `json:"name"`
-	Value   interface{} `json:"value" gorm:"type:text"`
-	Type    string      `json:"type"` // string, number, boolean, object
-}
 
-// Feature 表示事物的功能 - 符合 Ditto 标准
-type Feature struct {
-	Properties map[string]interface{} `json:"properties"` // 功能的状态和配置
-}
 
 // ThingService 提供数字孪生相关的业务逻辑
 type ThingService struct {
@@ -81,6 +71,7 @@ func (s *ThingService) CreateThing(thing *Thing) error {
 	return s.db.Create(thing).Error
 }
 
+
 // GetThing 根据ID获取数字孪生
 func (s *ThingService) GetThing(id string) (*Thing, error) {
 	var thing Thing
@@ -101,12 +92,7 @@ func (s *ThingService) GetThing(id string) (*Thing, error) {
 	if err != nil {
 		return nil, err
 	}
-	thing.Features = make(map[string]Feature)
-	for k, v := range featuresMap {
-		if featureMap, ok := v.(map[string]interface{}); ok {
-			thing.Features[k] = Feature{Properties: featureMap}
-		}
-	}
+	thing.Features = featuresMap
 
 	return &thing, nil
 }
@@ -160,7 +146,7 @@ func (s *ThingService) UpdateThing(id string, updates map[string]interface{}) er
 	}
 
 	if features, ok := updates["features"]; ok {
-		if feats, ok := features.(map[string]Feature); ok {
+		if feats, ok := features.(map[string]interface{}); ok {
 			data, err := json.Marshal(feats)
 			if err != nil {
 				return err
@@ -177,25 +163,6 @@ func (s *ThingService) DeleteThing(id string) error {
 	return s.db.Delete(&Thing{}, "id = ?", id).Error
 }
 
-// UpdateProperty 更新属性
-func (s *ThingService) UpdateProperty(thingID, propertyName string, value interface{}) error {
-	// 先尝试更新现有属性
-	result := s.db.Model(&Property{}).Where("thing_id = ? AND name = ?", thingID, propertyName).Update("value", value)
-
-	// 如果属性不存在，创建新属性
-	if result.RowsAffected == 0 {
-		property := &Property{
-			ID:      uuid.New().String(),
-			ThingID: thingID,
-			Name:    propertyName,
-			Value:   value,
-		}
-		return s.db.Create(property).Error
-	}
-
-	// 更新事物的更新时间
-	return s.db.Model(&Thing{}).Where("id = ?", thingID).Update("updated_at", time.Now()).Error
-}
 
 // UpdateStatus 更新状态
 func (s *ThingService) UpdateStatus(thingID string, status map[string]interface{}) error {
@@ -209,3 +176,53 @@ func (s *ThingService) UpdateStatus(thingID string, status map[string]interface{
 		"updated_at": time.Now(),
 	}).Error
 }
+
+// SetBehavior 为事物设置行为
+func (s *ThingService) SetBehavior(thingID, behaviorID string) error {
+	return s.db.Model(&Thing{}).Where("id = ?", thingID).Update("behavior_id", behaviorID).Error
+}
+
+// RemoveBehavior 从事物中移除行为
+func (s *ThingService) RemoveBehavior(thingID string) error {
+	return s.db.Model(&Thing{}).Where("id = ?", thingID).Update("behavior_id", nil).Error
+}
+
+// GetThingBehavior 获取事物的行为
+func (s *ThingService) GetThingBehavior(thingID string) (*Behavior, error) {
+	var thing Thing
+	if err := s.db.Preload("Behavior").First(&thing, "id = ?", thingID).Error; err != nil {
+		return nil, err
+	}
+	return thing.Behavior, nil
+}
+
+// AssignBehaviorByType 根据事物类型自动分配行为
+func (s *ThingService) AssignBehaviorByType(thingID, thingType string) error {
+	var thing Thing
+	if err := s.db.First(&thing, "id = ?", thingID).Error; err != nil {
+		return err
+	}
+
+	// 根据事物类型获取对应的行为
+	var behavior Behavior
+	var category string
+
+	switch thingType {
+	case "machine", "device":
+		category = "device"
+	case "person":
+		category = "person"
+	case "object":
+		category = "object"
+	default:
+		return nil // 未知类型，不分配行为
+	}
+
+	if err := s.db.Where("category = ?", category).First(&behavior).Error; err != nil {
+		return err
+	}
+
+	// 分配行为
+	return s.db.Model(&thing).Update("behavior_id", behavior.ID).Error
+}
+

@@ -27,3 +27,18 @@ func (s *Server) thingsPage(c *gin.Context) {
 func (s *Server) graphPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "graph.html", gin.H{})
 }
+
+// behaviorsPage 行为管理页面
+func (s *Server) behaviorsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "behaviors_new.html", gin.H{})
+}
+
+// relationshipsPage 关系管理页面
+func (s *Server) relationshipsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "relationships.html", gin.H{})
+}
+
+// actorsPage Actor管理页面
+func (s *Server) actorsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "actors.html", gin.H{})
+}

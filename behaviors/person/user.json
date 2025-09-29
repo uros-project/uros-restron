@@ -1,0 +1,177 @@
+{
+  "id": "user-001",
+  "name": "用户交互行为",
+  "type": "user",
+  "description": "处理用户交互请求",
+  "category": "person",
+  "functions": {
+    "process_user_interaction": {
+      "name": "处理用户交互",
+      "description": "处理用户交互请求并返回响应",
+      "input_params": {
+        "interaction_type": {
+          "type": "string",
+          "description": "交互类型",
+          "required": true,
+          "enum": ["touch", "voice", "gesture", "text"]
+        },
+        "user_input": {
+          "type": "string",
+          "description": "用户输入内容",
+          "required": true,
+          "max_length": 1000
+        },
+        "context": {
+          "type": "object",
+          "description": "交互上下文信息",
+          "required": false,
+          "properties": {
+            "user_id": "string",
+            "session_id": "string",
+            "device_id": "string"
+          }
+        }
+      },
+      "output_params": {
+        "response": {
+          "type": "string",
+          "description": "系统响应内容"
+        },
+        "action": {
+          "type": "string",
+          "description": "需要执行的动作",
+          "enum": ["none", "navigate", "execute", "confirm", "error"]
+        },
+        "confidence": {
+          "type": "number",
+          "description": "理解置信度（0-1）",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "parse_input",
+            "description": "解析用户输入"
+          },
+          {
+            "step": 2,
+            "action": "understand_intent",
+            "description": "理解用户意图"
+          },
+          {
+            "step": 3,
+            "action": "generate_response",
+            "description": "生成响应内容"
+          },
+          {
+            "step": 4,
+            "action": "format_output",
+            "description": "格式化输出"
+          }
+        ]
+      }
+    },
+    "authenticate_user": {
+      "name": "用户认证",
+      "description": "验证用户身份",
+      "input_params": {
+        "user_credentials": {
+          "type": "object",
+          "description": "用户凭据",
+          "required": true,
+          "properties": {
+            "username": "string",
+            "password": "string"
+          }
+        }
+      },
+      "output_params": {
+        "success": {
+          "type": "boolean",
+          "description": "认证是否成功"
+        },
+        "user_id": {
+          "type": "string",
+          "description": "用户ID"
+        },
+        "session_token": {
+          "type": "string",
+          "description": "会话令牌"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "validate_credentials",
+            "description": "验证用户凭据"
+          },
+          {
+            "step": 2,
+            "action": "check_permissions",
+            "description": "检查用户权限"
+          },
+          {
+            "step": 3,
+            "action": "generate_session",
+            "description": "生成会话"
+          }
+        ]
+      }
+    },
+    "get_user_preferences": {
+      "name": "获取用户偏好",
+      "description": "获取用户个性化设置和偏好",
+      "input_params": {
+        "user_id": {
+          "type": "string",
+          "description": "用户ID",
+          "required": true
+        },
+        "preference_type": {
+          "type": "string",
+          "description": "偏好类型",
+          "required": false,
+          "enum": ["ui", "language", "accessibility", "notifications"]
+        }
+      },
+      "output_params": {
+        "preferences": {
+          "type": "object",
+          "description": "用户偏好设置"
+        },
+        "last_updated": {
+          "type": "string",
+          "description": "最后更新时间"
+        }
+      },
+      "implementation": {
+        "steps": [
+          {
+            "step": 1,
+            "action": "load_user_profile",
+            "description": "加载用户档案"
+          },
+          {
+            "step": 2,
+            "action": "extract_preferences",
+            "description": "提取偏好设置"
+          },
+          {
+            "step": 3,
+            "action": "format_preferences",
+            "description": "格式化偏好数据"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "interaction_modes": ["touch", "voice", "gesture"],
+    "language": "zh-CN",
+    "accessibility": true
+  }
+}
