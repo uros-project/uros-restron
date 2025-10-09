@@ -13,8 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadTypes() {
     try {
         const response = await fetch('/api/v1/thing-types');
-        const data = await response.json();
-        allTypes = data.data || [];
+        const result = await response.json();
+        // API 返回格式: { success: true, data: { count: N, data: [...] } }
+        allTypes = result.data?.data || [];
         
         // 填充类型选择框
         const typeSelect = document.getElementById('thingType');
@@ -34,8 +35,9 @@ async function loadTypes() {
 async function loadThings() {
     try {
         const response = await fetch('/api/v1/things');
-        const data = await response.json();
-        allThings = data.data || [];
+        const result = await response.json();
+        // API 返回格式: { success: true, data: [...], count: N }
+        allThings = result.data || [];
         renderThings(allThings);
     } catch (error) {
         console.error('加载事物失败:', error);

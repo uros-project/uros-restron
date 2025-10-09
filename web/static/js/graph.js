@@ -77,7 +77,9 @@ async function loadGraphData() {
         const relationshipsData = await relationshipsResponse.json();
 
         // 构建节点数据
-        graphData.nodes = thingsData.data.map(thing => ({
+        // Things API 返回 {success: true, data: [...], count: N}
+        const things = thingsData.data || [];
+        graphData.nodes = things.map(thing => ({
             id: thing.id,
             name: thing.name,
             type: thing.type,
@@ -85,14 +87,29 @@ async function loadGraphData() {
         }));
 
         // 构建连接数据
-        graphData.links = relationshipsData.data.map(rel => ({
-            source: rel.sourceId,
-            target: rel.targetId,
-            type: rel.type,
-            name: rel.name,
-            description: rel.description,
-            properties: rel.properties
-        }));
+        // Relationships API 返回 {success: true, data: {data: [...], count: N}}
+        const relationships = relationshipsData.data?.data || [];
+        
+        // 创建节点ID集合用于验证
+        const nodeIds = new Set(graphData.nodes.map(n => n.id));
+        
+        // 只保留有效的关系（源和目标节点都存在）
+        graphData.links = relationships
+            .filter(rel => {
+                if (!nodeIds.has(rel.sourceId) || !nodeIds.has(rel.targetId)) {
+                    console.warn(`关系 ${rel.name} 引用了不存在的节点: source=${rel.sourceId}, target=${rel.targetId}`);
+                    return false;
+                }
+                return true;
+            })
+            .map(rel => ({
+                source: rel.sourceId,
+                target: rel.targetId,
+                type: rel.type,
+                name: rel.name,
+                description: rel.description,
+                properties: rel.properties
+            }));
 
         // 应用筛选
         applyFilters();

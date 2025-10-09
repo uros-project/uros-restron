@@ -30,7 +30,7 @@ func (s *Server) graphPage(c *gin.Context) {
 
 // behaviorsPage 行为管理页面
 func (s *Server) behaviorsPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "behaviors_new.html", gin.H{})
+	c.HTML(http.StatusOK, "behaviors.html", gin.H{})
 }
 
 // relationshipsPage 关系管理页面

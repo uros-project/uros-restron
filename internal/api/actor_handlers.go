@@ -56,33 +56,25 @@ func (h *ActorHandler) CallActorFunction(c *gin.Context) {
 	actorID := c.Param("id")
 	functionName := c.Param("function")
 
-	var request struct {
-		Params map[string]interface{} `json:"params"`
+	// 直接解析参数，如果body为空则使用空map
+	var params map[string]interface{}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		// 如果解析失败，使用空map
+		params = make(map[string]interface{})
 	}
 
-	if err := c.ShouldBindJSON(&request); err != nil {
-		utils.ValidationErrorResponse(c, err.Error())
-		return
-	}
-
-	// 获取Actor
-	_, err := h.actorManager.GetActor(actorID)
+	// 调用函数
+	result, err := h.actorManager.CallFunction(actorID, functionName, params)
 	if err != nil {
-		utils.RespondWithError(c, http.StatusNotFound, "Actor not found")
+		utils.RespondWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// 调用函数 - 这里需要根据实际的ActorManager接口来实现
-	// result, err := h.actorManager.CallActorFunction(actorID, functionName, request.Params)
-	// 暂时返回一个占位符响应
-	result := map[string]interface{}{
-		"actorId":    actorID,
-		"function":   functionName,
-		"params":     request.Params,
-		"message":    "Function call not implemented yet",
-	}
-
-	utils.RespondWithData(c, result)
+	utils.RespondWithData(c, gin.H{
+		"actorId":  actorID,
+		"function": functionName,
+		"result":   result,
+	})
 }
 
 // SendMessageToActor 向Actor发送消息
@@ -124,16 +116,19 @@ func (h *ActorHandler) GetActorFunctions(c *gin.Context) {
 	actorID := c.Param("id")
 
 	// 获取Actor
-	_, err := h.actorManager.GetActor(actorID)
+	actorInstance, err := h.actorManager.GetActor(actorID)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusNotFound, "Actor not found")
 		return
 	}
 
-	// 获取函数列表 - 这里需要根据实际的ActorManager接口来实现
-	// functions, err := h.actorManager.GetActorFunctions(actorID)
-	// 暂时返回一个占位符响应
-	functions := []string{"function1", "function2", "function3"}
+	// 获取函数列表
+	var functions []string
+	if behaviorActor, ok := actorInstance.(*actor.BehaviorActor); ok {
+		functions = behaviorActor.GetAvailableFunctions()
+	} else {
+		functions = []string{}
+	}
 
 	utils.RespondWithData(c, functions)
 }

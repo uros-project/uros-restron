@@ -13,8 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadThings() {
     try {
         const response = await fetch('/api/v1/things');
-        const data = await response.json();
-        allThings = data.data || [];
+        const result = await response.json();
+        // API 返回格式: { success: true, data: [...], count: N }
+        allThings = result.data || [];
         
         // 填充源事物和目标事物选择框
         const sourceSelect = document.getElementById('sourceId');
@@ -43,8 +44,9 @@ async function loadThings() {
 async function loadRelationships() {
     try {
         const response = await fetch('/api/v1/relationships');
-        const data = await response.json();
-        allRelationships = data.data || [];
+        const result = await response.json();
+        // API 返回格式: { success: true, data: {data: [...], count: N} }
+        allRelationships = result.data?.data || [];
         renderRelationships(allRelationships);
     } catch (error) {
         console.error('加载关系失败:', error);

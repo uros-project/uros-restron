@@ -35,7 +35,7 @@ func NewServer(cfg *config.Config, thingService *models.ThingService, thingTypeS
 }
 
 func (s *Server) setupRoutes() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	s.router = gin.New()
 	s.router.Use(gin.Logger())
 	s.router.Use(gin.Recovery())

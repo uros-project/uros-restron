@@ -11,8 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadActors() {
     try {
         const response = await fetch('/api/v1/actors');
-        const data = await response.json();
-        allActors = data.data || [];
+        const result = await response.json();
+        // API 返回格式: { success: true, data: { count: N, data: [...] } }
+        allActors = result.data?.data || [];
         renderActors(allActors);
         updateActorSelect(allActors);
     } catch (error) {
@@ -121,10 +122,12 @@ async function loadActorFunctions() {
     
     try {
         const response = await fetch(`/api/v1/actors/${actorId}/functions`);
-        const data = await response.json();
+        const result = await response.json();
+        // API 返回格式: { success: true, data: [...] }
+        const functions = result.data || [];
         
-        if (data.functions && data.functions.length > 0) {
-            data.functions.forEach(func => {
+        if (functions.length > 0) {
+            functions.forEach(func => {
                 const option = document.createElement('option');
                 option.value = func;
                 option.textContent = func;
@@ -164,7 +167,8 @@ async function callActorFunction(actorId = null) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ params: parameters })
+            // 直接发送参数对象，不包装在 params 中
+            body: JSON.stringify(parameters)
         });
         
         const result = await response.json();
@@ -188,7 +192,9 @@ function displayFunctionResult(result) {
 async function viewActorDetail(id) {
     try {
         const response = await fetch(`/api/v1/actors/${id}`);
-        const actor = await response.json();
+        const result = await response.json();
+        // API 返回格式: { success: true, data: {...} }
+        const actor = result.data;
         
         const content = document.getElementById('actorDetailContent');
         content.innerHTML = `
@@ -226,7 +232,9 @@ function closeActorDetailModal() {
 async function showActorHealthCheck() {
     try {
         const response = await fetch('/api/v1/actors/health');
-        const healthData = await response.json();
+        const result = await response.json();
+        // API 返回格式: { success: true, data: {...} }
+        const healthData = result.data;
         
         const content = document.getElementById('healthCheckContent');
         content.innerHTML = `

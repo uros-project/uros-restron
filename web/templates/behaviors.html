@@ -91,15 +91,17 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">
-            <h1>Uros Restron</h1>
-        </div>
-        <div class="nav-links">
-            <a href="/" class="nav-link">首页</a>
-            <a href="/types" class="nav-link">类型管理</a>
-            <a href="/things" class="nav-link">事物管理</a>
-            <a href="/behaviors" class="nav-link active">行为管理</a>
-            <a href="/graph" class="nav-link">关系图</a>
+        <div class="nav-container">
+            <h1 class="nav-title">Uros Restron</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">首页</a>
+                <a href="/types" class="nav-link">类型管理</a>
+                <a href="/things" class="nav-link">事物管理</a>
+                <a href="/behaviors" class="nav-link active">行为管理</a>
+                <a href="/relationships" class="nav-link">关系管理</a>
+                <a href="/actors" class="nav-link">Actor管理</a>
+                <a href="/graph" class="nav-link">关系图</a>
+            </div>
         </div>
     </nav>
 
@@ -110,10 +112,8 @@
         </div>
 
         <div class="actions">
-            <button id="loadBehaviors" class="btn btn-primary">加载行为</button>
             <button id="seedBehaviors" class="btn btn-secondary">填充预定义行为</button>
             <button id="refreshActors" class="btn btn-secondary">刷新Actor状态</button>
-            <button id="testButton" class="btn btn-secondary" onclick="testFunction()">测试按钮</button>
         </div>
 
         <div class="tabs">
@@ -142,7 +142,6 @@
 
             <div id="behaviorsList" class="behaviors-list">
                 <!-- 行为列表将在这里动态加载 -->
-                <p>测试内容 - behaviorsList元素存在</p>
             </div>
         </div>
 

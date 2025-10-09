@@ -23,10 +23,6 @@ class BehaviorManager {
         });
 
         // 按钮事件
-        document.getElementById('loadBehaviors').addEventListener('click', () => {
-            this.loadBehaviors();
-        });
-
         document.getElementById('seedBehaviors').addEventListener('click', () => {
             this.seedBehaviors();
         });
@@ -78,9 +74,9 @@ class BehaviorManager {
             const result = await response.json();
             console.log('Behaviors API response:', result);
             if (result.success && result.data) {
-                this.behaviors = result.data;
+                this.behaviors = result.data.data || [];
                 console.log('Behaviors loaded:', this.behaviors.length, 'items');
-                this.renderBehaviors(result.data);
+                this.renderBehaviors(this.behaviors);
             } else {
                 console.error('Failed to load behaviors:', result);
                 this.showError('加载行为失败: ' + (result.error || '未知错误'));
@@ -96,9 +92,9 @@ class BehaviorManager {
             const response = await fetch('/api/v1/actors');
             const result = await response.json();
             if (result.success && result.data) {
-                this.actors = result.data;
-                this.renderActors(result.data);
-                this.updateActorSelect(result.data);
+                this.actors = result.data.data || [];
+                this.renderActors(this.actors);
+                this.updateActorSelect(this.actors);
             } else {
                 this.showError('加载Actor状态失败: ' + (result.error || '未知错误'));
             }
