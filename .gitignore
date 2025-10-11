@@ -76,3 +76,59 @@ config.local.json
 # Backup files
 *.bak
 *.backup
+
+# ==================== ROSIX 相关 ====================
+
+# Java编译输出
+rosix/java/target/
+rosix/java/*.class
+rosix/java/.classpath
+rosix/java/.project
+rosix/java/.settings/
+
+# Maven本地仓库（如果有）
+rosix/java/lib/
+rosix/java/dependency-reduced-pom.xml
+
+# Java编译的JAR包
+rosix/java/*.jar
+!rosix/java/lib/*.jar
+
+# Go编译输出
+rosix/golang/bin/
+rosix/golang/*.exe
+rosix/golang/*.out
+
+# IDE特定文件
+rosix/**/.vscode/
+rosix/**/.idea/
+rosix/**/*.iml
+
+# 临时文件
+rosix/**/tmp/
+rosix/**/temp/
+rosix/**/*.tmp
+
+# 日志文件
+rosix/**/*.log
+
+# 操作系统生成文件
+rosix/**/.DS_Store
+
+# Node.js (如果未来添加JavaScript版本)
+rosix/javascript/node_modules/
+rosix/javascript/package-lock.json
+rosix/javascript/dist/
+
+# Python (如果未来添加Python版本)
+rosix/python/__pycache__/
+rosix/python/*.pyc
+rosix/python/.pytest_cache/
+rosix/python/venv/
+rosix/python/.venv/
+
+# ==================== 保留的文件 ====================
+# 源代码文件（.go, .java, .py, .js）会被保留
+# 文档文件（.md）会被保留
+# 配置文件（pom.xml, go.mod, package.json）会被保留
+# 示例文件（examples/）会被保留
