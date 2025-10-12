@@ -4,57 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数字孪生关系图 - Uros Restron</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/css/graph.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="nav-title">Uros Restron</h1>
-            <div class="nav-links">
-                <a href="/" class="nav-link">首页</a>
-                <a href="/types" class="nav-link">类型管理</a>
-                <a href="/things" class="nav-link">事物管理</a>
-                <a href="/behaviors" class="nav-link">行为管理</a>
-                <a href="/relationships" class="nav-link">关系管理</a>
-                <a href="/actors" class="nav-link">Actor管理</a>
-                <a href="/graph" class="nav-link active">关系图</a>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <h1 class="text-2xl font-bold text-white">Uros Restron</h1>
+                    <span class="ml-3 px-2 py-1 text-xs bg-white/20 text-white rounded-full">ROSIX</span>
+                </div>
+                <div class="hidden md:flex md:space-x-1">
+                    <a href="/" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">首页</a>
+                    <a href="/types" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">类型管理</a>
+                    <a href="/things" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">事物管理</a>
+                    <a href="/behaviors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">行为管理</a>
+                    <a href="/relationships" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">关系管理</a>
+                    <a href="/actors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">Actor管理</a>
+                    <a href="/graph" class="px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 transition">关系图</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="page-header">
-            <h2>数字孪生关系图</h2>
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">数字孪生关系图</h2>
+            <p class="text-gray-600 mt-1">可视化展示资源关系网络</p>
         </div>
 
-        <div class="graph-controls">
-            <div class="control-group">
-                <label for="relationshipType">关系类型筛选:</label>
-                <select id="relationshipType">
-                    <option value="">全部关系</option>
-                    <option value="contains">包含关系</option>
-                    <option value="composes">组合关系</option>
-                    <option value="owns">拥有关系</option>
-                    <option value="relates_to">关联关系</option>
-                    <option value="depends_on">依赖关系</option>
-                    <option value="influences">影响关系</option>
-                    <option value="collaborates">协作关系</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="thingType">事物类型筛选:</label>
-                <select id="thingType">
-                    <option value="">全部类型</option>
-                    <option value="person">人员</option>
-                    <option value="machine">设备</option>
-                    <option value="object">物品</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <button id="refreshGraph" class="btn btn-primary">刷新图形</button>
-                <button id="resetView" class="btn btn-secondary">重置视图</button>
+        <!-- 控制面板 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label for="relationshipType" class="block text-sm font-medium text-gray-700 mb-2">关系类型筛选</label>
+                    <select id="relationshipType" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
+                        <option value="">全部关系</option>
+                        <option value="contains">包含关系</option>
+                        <option value="composes">组合关系</option>
+                        <option value="owns">拥有关系</option>
+                        <option value="relates_to">关联关系</option>
+                        <option value="depends_on">依赖关系</option>
+                        <option value="influences">影响关系</option>
+                        <option value="collaborates">协作关系</option>
+                    </select>
+                </div>
+                <div class="flex-1">
+                    <label for="thingType" class="block text-sm font-medium text-gray-700 mb-2">事物类型筛选</label>
+                    <select id="thingType" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
+                        <option value="">全部类型</option>
+                        <option value="person">人员</option>
+                        <option value="machine">设备</option>
+                        <option value="object">物品</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button id="refreshGraph" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition font-medium whitespace-nowrap">🔄 刷新</button>
+                    <button id="resetView" class="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium whitespace-nowrap">↺ 重置</button>
+                </div>
             </div>
         </div>
 
@@ -106,6 +116,12 @@
             </div>
         </main>
     </div>
+
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2024 Uros Restron. 数字孪生平台 - Powered by ROSIX</p>
+        </div>
+    </footer>
 
     <script src="/static/js/graph.js"></script>
 </body>

@@ -68,44 +68,59 @@ function renderRelationships(relationships) {
 // 创建关系卡片
 function createRelationshipCard(relationship) {
     const card = document.createElement('div');
-    card.className = 'relationship-card';
+    card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
     
     const sourceThing = allThings.find(t => t.id === relationship.sourceId);
     const targetThing = allThings.find(t => t.id === relationship.targetId);
     
+    const typeColors = {
+        'contains': 'bg-blue-100 text-blue-800',
+        'owns': 'bg-purple-100 text-purple-800',
+        'collaborates': 'bg-green-100 text-green-800',
+        'depends_on': 'bg-yellow-100 text-yellow-800',
+        'composes': 'bg-pink-100 text-pink-800',
+        'influences': 'bg-orange-100 text-orange-800',
+        'relates_to': 'bg-gray-100 text-gray-800'
+    };
+    const typeClass = typeColors[relationship.type] || 'bg-gray-100 text-gray-800';
+    
     const propertiesHtml = relationship.properties && Object.keys(relationship.properties).length > 0 
         ? Object.entries(relationship.properties).map(([key, value]) => 
-            `<div class="property-item">
-                <span class="property-name">${key}</span>
-                <span class="property-type">${value}</span>
+            `<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="text-sm font-medium text-gray-700">${key}</span>
+                <span class="text-sm text-gray-600">${value}</span>
             </div>`
           ).join('')
-        : '<p style="color: #7f8c8d; font-style: italic;">暂无属性</p>';
+        : '<p class="text-gray-400 italic text-sm">暂无属性</p>';
 
     card.innerHTML = `
-        <div class="card-header">
-            <h3 class="card-title">${relationship.name}</h3>
-            <span class="card-category">${relationship.type}</span>
-        </div>
-        <div class="relationship-content">
-            <div class="relationship-connection">
-                <div class="relationship-source">
-                    <strong>源:</strong> ${sourceThing ? sourceThing.name : '未知事物'}
-                </div>
-                <div class="relationship-arrow">→</div>
-                <div class="relationship-target">
-                    <strong>目标:</strong> ${targetThing ? targetThing.name : '未知事物'}
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-gray-900">${relationship.name}</h3>
+                <span class="px-3 py-1 ${typeClass} rounded-full text-xs font-semibold">${relationship.type}</span>
+            </div>
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex-1 bg-white rounded-lg p-3 shadow-sm">
+                        <p class="text-xs text-gray-500 mb-1">源事物</p>
+                        <p class="text-sm font-semibold text-gray-900">${sourceThing ? sourceThing.name : '未知事物'}</p>
+                    </div>
+                    <div class="text-2xl text-blue-600 font-bold">→</div>
+                    <div class="flex-1 bg-white rounded-lg p-3 shadow-sm">
+                        <p class="text-xs text-gray-500 mb-1">目标事物</p>
+                        <p class="text-sm font-semibold text-gray-900">${targetThing ? targetThing.name : '未知事物'}</p>
+                    </div>
                 </div>
             </div>
-            <p class="card-description">${relationship.description || '暂无描述'}</p>
-            <div class="card-properties">
-                <strong>关系属性:</strong>
+            <p class="text-gray-600 text-sm mb-4">${relationship.description || '暂无描述'}</p>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <p class="text-sm font-semibold text-gray-700 mb-2">关系属性:</p>
                 ${propertiesHtml}
             </div>
-        </div>
-        <div class="card-actions">
-            <button class="btn btn-secondary" onclick="viewRelationshipDetail('${relationship.id}')">查看详情</button>
-            <button class="btn btn-danger" onclick="deleteRelationship('${relationship.id}')">删除</button>
+            <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200">
+                <button onclick="viewRelationshipDetail('${relationship.id}')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">📋 查看详情</button>
+                <button onclick="deleteRelationship('${relationship.id}')" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-sm">🗑️ 删除</button>
+            </div>
         </div>
     `;
     
@@ -140,12 +155,16 @@ function searchRelationships() {
 
 // 显示创建关系模态框
 function showCreateRelationshipModal() {
-    document.getElementById('createRelationshipModal').style.display = 'block';
+    const modal = document.getElementById('createRelationshipModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 }
 
 // 关闭创建关系模态框
 function closeCreateRelationshipModal() {
-    document.getElementById('createRelationshipModal').style.display = 'none';
+    const modal = document.getElementById('createRelationshipModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.getElementById('createRelationshipForm').reset();
 }
 
@@ -246,7 +265,11 @@ async function viewRelationshipDetail(id) {
             </div>
         `;
         
-        document.getElementById('relationshipDetailModal').style.display = 'block';
+        const modal = document.getElementById('relationshipDetailModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     } catch (error) {
         console.error('加载关系详情失败:', error);
         alert('加载详情失败: ' + error.message);
@@ -255,7 +278,11 @@ async function viewRelationshipDetail(id) {
 
 // 关闭关系详情模态框
 function closeRelationshipDetailModal() {
-    document.getElementById('relationshipDetailModal').style.display = 'none';
+    const modal = document.getElementById('relationshipDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 
 // 删除关系

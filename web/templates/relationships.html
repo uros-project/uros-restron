@@ -4,72 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关系管理 - Uros Restron</title>
-    <link href="/static/css/style.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="nav-title">Uros Restron</h1>
-            <div class="nav-links">
-                <a href="/" class="nav-link">首页</a>
-                <a href="/types" class="nav-link">类型管理</a>
-                <a href="/things" class="nav-link">事物管理</a>
-                <a href="/behaviors" class="nav-link">行为管理</a>
-                <a href="/relationships" class="nav-link active">关系管理</a>
-                <a href="/actors" class="nav-link">Actor管理</a>
-                <a href="/graph" class="nav-link">关系图</a>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <h1 class="text-2xl font-bold text-white">Uros Restron</h1>
+                    <span class="ml-3 px-2 py-1 text-xs bg-white/20 text-white rounded-full">ROSIX</span>
+                </div>
+                <div class="hidden md:flex md:space-x-1">
+                    <a href="/" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">首页</a>
+                    <a href="/types" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">类型管理</a>
+                    <a href="/things" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">事物管理</a>
+                    <a href="/behaviors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">行为管理</a>
+                    <a href="/relationships" class="px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 transition">关系管理</a>
+                    <a href="/actors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">Actor管理</a>
+                    <a href="/graph" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">关系图</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="page-header">
-            <h2>关系管理</h2>
-            <button class="btn btn-primary" onclick="showCreateRelationshipModal()">创建新关系</button>
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full">
+        <!-- 页面头部 -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">关系管理</h2>
+                <p class="text-gray-600 mt-1">管理事物之间的关联关系</p>
+            </div>
+            <button onclick="showCreateRelationshipModal()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all font-semibold">
+                ➕ 创建新关系
+            </button>
         </div>
 
-        <div class="filter-bar">
-            <select id="typeFilter" onchange="filterRelationships()">
-                <option value="">所有类型</option>
-                <option value="contains">包含关系</option>
-                <option value="owns">拥有关系</option>
-                <option value="collaborates">协作关系</option>
-                <option value="depends_on">依赖关系</option>
-                <option value="composes">组合关系</option>
-                <option value="influences">影响关系</option>
-                <option value="relates_to">关联关系</option>
-            </select>
-            <input type="text" id="searchInput" placeholder="搜索关系..." onkeyup="searchRelationships()">
+        <!-- 过滤栏 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <select id="typeFilter" onchange="filterRelationships()" class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
+                    <option value="">所有类型</option>
+                    <option value="contains">包含关系</option>
+                    <option value="owns">拥有关系</option>
+                    <option value="collaborates">协作关系</option>
+                    <option value="depends_on">依赖关系</option>
+                    <option value="composes">组合关系</option>
+                    <option value="influences">影响关系</option>
+                    <option value="relates_to">关联关系</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="搜索关系..." onkeyup="searchRelationships()" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
+            </div>
         </div>
 
-        <div class="relationships-grid" id="relationshipsGrid">
+        <!-- 关系网格 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="relationshipsGrid">
             <!-- 关系卡片将在这里动态加载 -->
         </div>
     </main>
 
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2024 Uros Restron. 数字孪生平台 - Powered by ROSIX</p>
+        </div>
+    </footer>
+
     <!-- 创建关系模态框 -->
-    <div id="createRelationshipModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>创建关系</h3>
-                <span class="close" onclick="closeCreateRelationshipModal()">&times;</span>
+    <div id="createRelationshipModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-900">创建关系</h3>
+                <button onclick="closeCreateRelationshipModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">&times;</button>
             </div>
-            <form id="createRelationshipForm">
-                <div class="form-group">
-                    <label for="sourceId">源事物</label>
-                    <select id="sourceId" name="sourceId" required>
+            <div class="p-6">
+            <form id="createRelationshipForm" class="space-y-6">
+                <div>
+                    <label for="sourceId" class="block text-sm font-medium text-gray-700 mb-2">源事物</label>
+                    <select id="sourceId" name="sourceId" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                         <option value="">请选择源事物</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="targetId">目标事物</label>
-                    <select id="targetId" name="targetId" required>
+                <div>
+                    <label for="targetId" class="block text-sm font-medium text-gray-700 mb-2">目标事物</label>
+                    <select id="targetId" name="targetId" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                         <option value="">请选择目标事物</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="relationshipType">关系类型</label>
-                    <select id="relationshipType" name="type" required>
+                <div>
+                    <label for="relationshipType" class="block text-sm font-medium text-gray-700 mb-2">关系类型</label>
+                    <select id="relationshipType" name="type" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                         <option value="">请选择关系类型</option>
                         <option value="contains">包含</option>
                         <option value="owns">拥有</option>
@@ -80,39 +103,40 @@
                         <option value="relates_to">关联</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="relationshipName">关系名称</label>
-                    <input type="text" id="relationshipName" name="name" required>
+                <div>
+                    <label for="relationshipName" class="block text-sm font-medium text-gray-700 mb-2">关系名称</label>
+                    <input type="text" id="relationshipName" name="name" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                 </div>
-                <div class="form-group">
-                    <label for="relationshipDescription">关系描述</label>
-                    <textarea id="relationshipDescription" name="description" rows="3"></textarea>
+                <div>
+                    <label for="relationshipDescription" class="block text-sm font-medium text-gray-700 mb-2">关系描述</label>
+                    <textarea id="relationshipDescription" name="description" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="relationshipProperties">关系属性 (JSON格式)</label>
-                    <textarea id="relationshipProperties" name="properties" rows="4" placeholder='{"key": "value"}'></textarea>
+                <div>
+                    <label for="relationshipProperties" class="block text-sm font-medium text-gray-700 mb-2">关系属性 (JSON格式)</label>
+                    <textarea id="relationshipProperties" name="properties" rows="4" placeholder='{"key": "value"}' class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition font-mono text-sm"></textarea>
                 </div>
-                <div class="form-actions">
-                    <button type="button" onclick="closeCreateRelationshipModal()" class="btn btn-secondary">取消</button>
-                    <button type="submit" class="btn btn-primary">创建</button>
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeCreateRelationshipModal()" class="px-6 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">取消</button>
+                    <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition font-medium">创建</button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
     <!-- 关系详情模态框 -->
-    <div id="relationshipDetailModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <h3>关系详情</h3>
-                <span class="close" onclick="closeRelationshipDetailModal()">&times;</span>
+    <div id="relationshipDetailModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-900">关系详情</h3>
+                <button onclick="closeRelationshipDetailModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">&times;</button>
             </div>
-            <div id="relationshipDetailContent">
+            <div id="relationshipDetailContent" class="p-6">
                 <!-- 关系详情将在这里动态加载 -->
             </div>
         </div>
     </div>
 
-    <script src="/static/js/relationships.js"></script>
+    <script src="/static/js/relationships.js?v=2"></script>
 </body>
 </html>

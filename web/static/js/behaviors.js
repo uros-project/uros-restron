@@ -132,7 +132,7 @@ class BehaviorManager {
         container.innerHTML = '';
 
         if (behaviors.length === 0) {
-            container.innerHTML = '<p class="no-data">暂无行为数据</p>';
+            container.innerHTML = '<p class="text-gray-400 text-center py-12">暂无行为数据</p>';
             return;
         }
 
@@ -145,27 +145,30 @@ class BehaviorManager {
 
     createBehaviorCard(behavior) {
         const card = document.createElement('div');
-        card.className = 'behavior-card';
+        card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
+        
+        const typeColors = {
+            'purifier': 'bg-blue-100 text-blue-800',
+            'sensor': 'bg-green-100 text-green-800',
+            'container': 'bg-purple-100 text-purple-800',
+            'user': 'bg-pink-100 text-pink-800'
+        };
+        const typeClass = typeColors[behavior.type] || 'bg-gray-100 text-gray-800';
+        
         card.innerHTML = `
-            <div class="behavior-header">
-                <h3>${behavior.name}</h3>
-                <span class="behavior-type">${behavior.type}</span>
-            </div>
-            <div class="behavior-content">
-                <p class="behavior-description">${behavior.description}</p>
-                <div class="behavior-meta">
-                    <span class="behavior-category">分类: ${behavior.category}</span>
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">${behavior.name}</h3>
+                    <span class="px-3 py-1 ${typeClass} rounded-full text-xs font-semibold">${behavior.type}</span>
                 </div>
-                <div class="behavior-actions">
-                    <button class="btn btn-sm btn-primary" onclick="behaviorManager.viewBehavior('${behavior.id}')">
-                        查看详情
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="behaviorManager.editBehavior('${behavior.id}')">
-                        编辑
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="behaviorManager.deleteBehavior('${behavior.id}')">
-                        删除
-                    </button>
+                <p class="text-gray-600 text-sm mb-4">${behavior.description}</p>
+                <div class="mb-4">
+                    <span class="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">分类: ${behavior.category}</span>
+                </div>
+                <div class="flex gap-2 pt-4 border-t border-gray-200">
+                    <button onclick="behaviorManager.viewBehavior('${behavior.id}')" class="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">📋 详情</button>
+                    <button onclick="behaviorManager.editBehavior('${behavior.id}')" class="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">✏️ 编辑</button>
+                    <button onclick="behaviorManager.deleteBehavior('${behavior.id}')" class="flex-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">🗑️ 删除</button>
                 </div>
             </div>
         `;
@@ -177,7 +180,7 @@ class BehaviorManager {
         container.innerHTML = '';
 
         if (actors.length === 0) {
-            container.innerHTML = '<p class="no-data">暂无Actor数据</p>';
+            container.innerHTML = '<p class="text-gray-400 text-center py-12">暂无Actor数据</p>';
             return;
         }
 
@@ -189,25 +192,44 @@ class BehaviorManager {
 
     createActorCard(actor) {
         const card = document.createElement('div');
-        card.className = 'actor-card';
+        card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
+        
+        const statusColors = {
+            'running': 'bg-green-100 text-green-800',
+            'stopped': 'bg-gray-100 text-gray-800',
+            'error': 'bg-red-100 text-red-800',
+            'idle': 'bg-yellow-100 text-yellow-800'
+        };
+        const statusClass = statusColors[actor.status] || 'bg-gray-100 text-gray-800';
+        
+        const statusIcons = {
+            'running': '🟢',
+            'stopped': '⚫',
+            'error': '🔴',
+            'idle': '🟡'
+        };
+        const statusIcon = statusIcons[actor.status] || '⚪';
+        
         card.innerHTML = `
-            <div class="actor-header">
-                <h3>Actor ${actor.id.substring(0, 8)}...</h3>
-                <span class="actor-status ${actor.status}">${actor.status}</span>
-            </div>
-            <div class="actor-content">
-                <p class="actor-name">${actor.name || '未命名Actor'}</p>
-                <div class="actor-meta">
-                    <span class="actor-type">类型: ${actor.type}</span>
-                    <span class="actor-last-active">最后活跃: ${new Date(actor.lastActive).toLocaleString()}</span>
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Actor ${actor.id.substring(0, 8)}...</h3>
+                    <span class="px-3 py-1 ${statusClass} rounded-full text-xs font-semibold flex items-center gap-1">${statusIcon} ${actor.status}</span>
                 </div>
-                <div class="actor-actions">
-                    <button class="btn btn-sm btn-primary" onclick="behaviorManager.viewActor('${actor.id}')">
-                        查看详情
-                    </button>
-                    <button class="btn btn-sm btn-secondary" onclick="behaviorManager.callActorFunction('${actor.id}')">
-                        调用函数
-                    </button>
+                <p class="text-gray-900 font-medium mb-3">${actor.name || '未命名Actor'}</p>
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-gray-500">类型:</span>
+                        <span class="text-gray-900">${actor.type}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-gray-500">最后活跃:</span>
+                        <span class="text-gray-900 text-xs">${new Date(actor.lastActive).toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-4 border-t border-gray-200">
+                    <button onclick="behaviorManager.viewActor('${actor.id}')" class="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">📋 详情</button>
+                    <button onclick="behaviorManager.callActorFunction('${actor.id}')" class="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm">▶ 调用</button>
                 </div>
             </div>
         `;

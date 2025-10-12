@@ -42,3 +42,8 @@ func (s *Server) relationshipsPage(c *gin.Context) {
 func (s *Server) actorsPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "actors.html", gin.H{})
 }
+
+// testThemePage 主题切换测试页面
+func (s *Server) testThemePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "test-theme.html", gin.H{})
+}

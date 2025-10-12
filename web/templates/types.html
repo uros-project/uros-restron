@@ -4,32 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>事物类型管理 - Uros Restron</title>
-    <link href="/static/css/style.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="nav-title">Uros Restron</h1>
-            <div class="nav-links">
-                <a href="/" class="nav-link">首页</a>
-                <a href="/types" class="nav-link active">类型管理</a>
-                <a href="/things" class="nav-link">事物管理</a>
-                <a href="/behaviors" class="nav-link">行为管理</a>
-                <a href="/relationships" class="nav-link">关系管理</a>
-                <a href="/actors" class="nav-link">Actor管理</a>
-                <a href="/graph" class="nav-link">关系图</a>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <h1 class="text-2xl font-bold text-white">Uros Restron</h1>
+                    <span class="ml-3 px-2 py-1 text-xs bg-white/20 text-white rounded-full">ROSIX</span>
+                </div>
+                <div class="hidden md:flex md:space-x-1">
+                    <a href="/" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">首页</a>
+                    <a href="/types" class="px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 transition">类型管理</a>
+                    <a href="/things" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">事物管理</a>
+                    <a href="/behaviors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">行为管理</a>
+                    <a href="/relationships" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">关系管理</a>
+                    <a href="/actors" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">Actor管理</a>
+                    <a href="/graph" class="px-4 py-2 rounded-lg text-white hover:bg-white/10 transition">关系图</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="page-header">
-            <h2>事物类型管理</h2>
-            <button class="btn btn-primary" onclick="showCreateTypeModal()">创建新类型</button>
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full">
+        <!-- 页面头部 -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">事物类型管理</h2>
+                <p class="text-gray-600 mt-1">定义和管理事物类型模板</p>
+            </div>
+            <button onclick="showCreateTypeModal()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all font-semibold">
+                ➕ 创建新类型
+            </button>
         </div>
 
-        <div class="filter-bar">
-            <select id="categoryFilter" onchange="filterTypes()">
+        <!-- 过滤栏 -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <select id="categoryFilter" onchange="filterTypes()" class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                 <option value="">所有分类</option>
                 <option value="person">人员</option>
                 <option value="machine">设备</option>
@@ -37,87 +50,96 @@
             </select>
         </div>
 
-        <div class="types-grid" id="typesGrid">
+        <!-- 类型网格 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="typesGrid">
             <!-- 类型卡片将在这里动态加载 -->
         </div>
     </main>
 
     <!-- 创建类型模态框 -->
-    <div id="createTypeModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>创建事物类型</h3>
-                <span class="close" onclick="closeCreateTypeModal()">&times;</span>
+    <div id="createTypeModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-900">创建事物类型</h3>
+                <button onclick="closeCreateTypeModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">&times;</button>
             </div>
-            <form id="createTypeForm">
-                <div class="form-group">
-                    <label for="typeName">类型名称</label>
-                    <input type="text" id="typeName" name="name" required>
+            <div class="p-6">
+            <form id="createTypeForm" class="space-y-6">
+                <div>
+                    <label for="typeName" class="block text-sm font-medium text-gray-700 mb-2">类型名称</label>
+                    <input type="text" id="typeName" name="name" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                 </div>
-                <div class="form-group">
-                    <label for="typeDescription">描述</label>
-                    <textarea id="typeDescription" name="description" rows="3"></textarea>
+                <div>
+                    <label for="typeDescription" class="block text-sm font-medium text-gray-700 mb-2">描述</label>
+                    <textarea id="typeDescription" name="description" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="typeCategory">分类</label>
-                    <select id="typeCategory" name="category" required>
+                <div>
+                    <label for="typeCategory" class="block text-sm font-medium text-gray-700 mb-2">分类</label>
+                    <select id="typeCategory" name="category" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition">
                         <option value="person">人员</option>
                         <option value="machine">设备</option>
                         <option value="object">物品</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>属性模式 (Attributes)</label>
-                    <div id="attributesSchema">
-                        <div class="property-item">
-                            <input type="text" placeholder="属性名" class="property-name">
-                            <select class="property-type">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">属性模式 (Attributes)</label>
+                    <div id="attributesSchema" class="space-y-2 mb-2">
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="属性名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+                            <select class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
                                 <option value="string">字符串</option>
                                 <option value="number">数字</option>
                                 <option value="boolean">布尔值</option>
                             </select>
-                            <button type="button" onclick="removeProperty(this)">删除</button>
+                            <button type="button" onclick="removeProperty(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
                         </div>
                     </div>
-                    <button type="button" onclick="addProperty()" class="btn btn-secondary">添加属性</button>
+                    <button type="button" onclick="addProperty()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium">+ 添加属性</button>
                 </div>
                 
-                <div class="form-group">
-                    <label>功能定义</label>
-                    <div id="featuresSchema">
-                        <div class="feature-item">
-                            <div class="feature-header">
-                                <input type="text" placeholder="功能名" class="feature-name">
-                                <input type="text" placeholder="功能描述" class="feature-description">
-                                <button type="button" onclick="removeFeature(this)">删除</button>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">功能定义</label>
+                    <div id="featuresSchema" class="space-y-4 mb-2">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="flex gap-2 mb-3">
+                                <input type="text" placeholder="功能名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+                                <input type="text" placeholder="功能描述" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+                                <button type="button" onclick="removeFeature(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
                             </div>
-                            <div class="feature-properties">
-                                <label class="feature-properties-label">功能属性:</label>
-                                <div class="feature-property-list">
-                                    <div class="feature-property-item">
-                                        <input type="text" placeholder="属性名" class="feature-property-name">
-                                        <select class="feature-property-type">
+                            <div class="ml-4">
+                                <label class="block text-sm font-medium text-gray-600 mb-2">功能属性:</label>
+                                <div class="space-y-2 mb-2">
+                                    <div class="flex gap-2">
+                                        <input type="text" placeholder="属性名" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
+                                        <select class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
                                             <option value="string">字符串</option>
                                             <option value="number">数字</option>
                                             <option value="boolean">布尔值</option>
                                         </select>
-                                        <button type="button" onclick="removeFeatureProperty(this)">删除</button>
+                                        <button type="button" onclick="removeFeatureProperty(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">删除</button>
                                     </div>
                                 </div>
-                                <button type="button" onclick="addFeatureProperty(this)" class="btn btn-small">添加属性</button>
+                                <button type="button" onclick="addFeatureProperty(this)" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm">+ 添加属性</button>
                             </div>
                         </div>
                     </div>
-                    <button type="button" onclick="addFeature()" class="btn btn-secondary">添加功能</button>
+                    <button type="button" onclick="addFeature()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium">+ 添加功能</button>
                 </div>
-                <div class="form-actions">
-                    <button type="button" onclick="closeCreateTypeModal()" class="btn btn-secondary">取消</button>
-                    <button type="submit" class="btn btn-primary">创建</button>
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeCreateTypeModal()" class="px-6 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">取消</button>
+                    <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition font-medium">创建</button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
-    <script src="/static/js/types.js"></script>
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-300">&copy; 2024 Uros Restron. 数字孪生平台 - Powered by ROSIX</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/types.js?v=3"></script>
 </body>
 </html>

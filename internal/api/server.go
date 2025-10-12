@@ -53,6 +53,7 @@ func (s *Server) setupRoutes() {
 	s.router.GET("/relationships", s.relationshipsPage)
 	s.router.GET("/actors", s.actorsPage)
 	s.router.GET("/graph", s.graphPage)
+	s.router.GET("/test-theme", s.testThemePage)
 
 	// API 路由组
 	api := s.router.Group("/api/v1")

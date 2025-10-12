@@ -50,3 +50,4 @@ public class Query {
     private int offset = 0;
 }
 
+

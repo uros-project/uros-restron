@@ -1,0 +1,21 @@
+<!-- 导航栏组件 -->
+<nav class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex-shrink-0 flex items-center">
+                <h1 class="text-2xl font-bold text-white">Uros Restron</h1>
+                <span class="ml-3 px-2 py-1 text-xs bg-white/20 text-white rounded-full">ROSIX</span>
+            </div>
+            <div class="hidden md:flex md:space-x-1">
+                <a href="/" class="px-4 py-2 rounded-lg text-white {{if eq .Page "index"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">首页</a>
+                <a href="/types" class="px-4 py-2 rounded-lg text-white {{if eq .Page "types"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">类型管理</a>
+                <a href="/things" class="px-4 py-2 rounded-lg text-white {{if eq .Page "things"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">事物管理</a>
+                <a href="/behaviors" class="px-4 py-2 rounded-lg text-white {{if eq .Page "behaviors"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">行为管理</a>
+                <a href="/relationships" class="px-4 py-2 rounded-lg text-white {{if eq .Page "relationships"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">关系管理</a>
+                <a href="/actors" class="px-4 py-2 rounded-lg text-white {{if eq .Page "actors"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">Actor管理</a>
+                <a href="/graph" class="px-4 py-2 rounded-lg text-white {{if eq .Page "graph"}}bg-white/20 hover:bg-white/30{{else}}hover:bg-white/10{{end}} transition">关系图</a>
+            </div>
+        </div>
+    </div>
+</nav>
+

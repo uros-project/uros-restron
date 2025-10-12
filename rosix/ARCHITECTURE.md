@@ -372,3 +372,4 @@ orchestrator.RegisterIntent(&IntentPattern{
 - 第三方资源接入
 - 资源市场
 
+

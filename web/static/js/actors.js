@@ -36,34 +36,75 @@ function renderActors(actors) {
 // 创建Actor卡片
 function createActorCard(actor) {
     const card = document.createElement('div');
-    card.className = 'actor-card';
+    card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
     
     const functionsHtml = actor.functions && actor.functions.length > 0 
-        ? actor.functions.map(func => `<span class="function-tag">${func}</span>`).join('')
-        : '<span style="color: #7f8c8d; font-style: italic;">暂无函数</span>';
+        ? actor.functions.map(func => `<span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium mr-2 mb-2">${func}</span>`).join('')
+        : '<span class="text-gray-400 italic text-sm">暂无函数</span>';
 
-    const lastActive = new Date(actor.lastActive).toLocaleString();
+    const lastActive = actor.lastActive ? new Date(actor.lastActive).toLocaleString() : '未知';
+    
+    // 状态颜色映射
+    const statusColors = {
+        'running': 'bg-green-100 text-green-800',
+        'stopped': 'bg-gray-100 text-gray-800',
+        'error': 'bg-red-100 text-red-800',
+        'idle': 'bg-yellow-100 text-yellow-800'
+    };
+    const statusClass = statusColors[actor.status] || 'bg-gray-100 text-gray-800';
+    
+    // 状态图标
+    const statusIcons = {
+        'running': '🟢',
+        'stopped': '⚫',
+        'error': '🔴',
+        'idle': '🟡'
+    };
+    const statusIcon = statusIcons[actor.status] || '⚪';
 
     card.innerHTML = `
-        <div class="card-header">
-            <h3 class="card-title">${actor.name || '未命名Actor'}</h3>
-            <span class="card-status status-${actor.status}">${actor.status}</span>
-        </div>
-        <div class="actor-content">
-            <p class="actor-id">ID: ${actor.id}</p>
-            <p class="actor-last-active">最后活跃: ${lastActive}</p>
-            <div class="actor-functions">
-                <strong>可用函数:</strong>
-                <div class="functions-list">${functionsHtml}</div>
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-gray-900">${actor.name || '未命名Actor'}</h3>
+                <span class="px-3 py-1 ${statusClass} rounded-full text-xs font-semibold flex items-center gap-1">
+                    ${statusIcon} ${actor.status}
+                </span>
             </div>
-        </div>
-        <div class="card-actions">
-            <button class="btn btn-secondary" onclick="viewActorDetail('${actor.id}')">查看详情</button>
-            <button class="btn btn-primary" onclick="callActorFunction('${actor.id}')">调用函数</button>
+            <div class="space-y-3">
+                <p class="text-xs text-gray-500 font-mono bg-gray-50 px-3 py-2 rounded break-all">
+                    ID: ${actor.id}
+                </p>
+                <p class="text-sm text-gray-600">
+                    <span class="font-medium">最后活跃:</span> ${lastActive}
+                </p>
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">可用函数:</p>
+                    <div class="flex flex-wrap">${functionsHtml}</div>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+                <button onclick="viewActorDetail('${actor.id}')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">
+                    📋 查看详情
+                </button>
+                <button onclick="selectActorForCall('${actor.id}')" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-md transition font-medium text-sm">
+                    ▶ 调用
+                </button>
+            </div>
         </div>
     `;
     
     return card;
+}
+
+// 选择Actor用于调用
+function selectActorForCall(actorId) {
+    document.getElementById('actorSelect').value = actorId;
+    loadActorFunctions();
+    // 滚动到调用区域
+    const callSection = document.querySelector('.bg-white.rounded-lg.shadow-lg');
+    if (callSection) {
+        callSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
 // 更新Actor选择框
@@ -182,9 +223,22 @@ async function callActorFunction(actorId = null) {
 // 显示函数调用结果
 function displayFunctionResult(result) {
     const container = document.getElementById('functionResult');
+    
+    const success = result.success || false;
+    const bgColor = success ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300';
+    const iconColor = success ? 'text-green-600' : 'text-red-600';
+    const icon = success ? '✅' : '❌';
+    
     container.innerHTML = `
-        <h4>函数调用结果</h4>
-        <pre class="result-json">${JSON.stringify(result, null, 2)}</pre>
+        <div class="border-2 ${bgColor} rounded-lg p-6">
+            <h4 class="text-lg font-bold ${iconColor} mb-4 flex items-center gap-2">
+                <span class="text-2xl">${icon}</span>
+                函数调用结果
+            </h4>
+            <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <pre class="text-sm font-mono overflow-x-auto">${JSON.stringify(result, null, 2)}</pre>
+            </div>
+        </div>
     `;
 }
 
@@ -197,26 +251,56 @@ async function viewActorDetail(id) {
         const actor = result.data;
         
         const content = document.getElementById('actorDetailContent');
+        
+        const statusColors = {
+            'running': 'bg-green-100 text-green-800',
+            'stopped': 'bg-gray-100 text-gray-800',
+            'error': 'bg-red-100 text-red-800',
+            'idle': 'bg-yellow-100 text-yellow-800'
+        };
+        const statusClass = statusColors[actor.status] || 'bg-gray-100 text-gray-800';
+        
         content.innerHTML = `
-            <div class="actor-detail">
-                <h4>${actor.name || '未命名Actor'}</h4>
-                <p><strong>ID:</strong> ${actor.id}</p>
-                <p><strong>状态:</strong> <span class="status-${actor.status}">${actor.status}</span></p>
-                <p><strong>最后活跃:</strong> ${new Date(actor.lastActive).toLocaleString()}</p>
-                
-                <h5>可用函数</h5>
-                <div class="functions-list">
-                    ${actor.functions && actor.functions.length > 0 
-                        ? actor.functions.map(func => `<span class="function-tag">${func}</span>`).join('')
-                        : '<p>暂无函数</p>'}
+            <div class="space-y-6">
+                <div>
+                    <h4 class="text-2xl font-bold text-gray-900 mb-4">${actor.name || '未命名Actor'}</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">Actor ID</p>
+                            <p class="font-mono text-xs text-gray-800 break-all">${actor.id}</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600 mb-1">状态</p>
+                            <span class="inline-block px-3 py-1 ${statusClass} rounded-full text-sm font-semibold">${actor.status}</span>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                            <p class="text-sm text-gray-600 mb-1">最后活跃时间</p>
+                            <p class="text-gray-800">${actor.lastActive ? new Date(actor.lastActive).toLocaleString() : '未知'}</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <h5>Actor状态详情</h5>
-                <pre class="actor-status-json">${JSON.stringify(actor, null, 2)}</pre>
+                <div>
+                    <h5 class="text-lg font-bold text-gray-900 mb-3">可用函数</h5>
+                    <div class="flex flex-wrap gap-2">
+                        ${actor.functions && actor.functions.length > 0 
+                            ? actor.functions.map(func => `<span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">${func}</span>`).join('')
+                            : '<p class="text-gray-400 italic">暂无函数</p>'}
+                    </div>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-bold text-gray-900 mb-3">完整状态信息</h5>
+                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-sm font-mono">${JSON.stringify(actor, null, 2)}</pre>
+                    </div>
+                </div>
             </div>
         `;
         
-        document.getElementById('actorDetailModal').style.display = 'block';
+        const modal = document.getElementById('actorDetailModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     } catch (error) {
         console.error('加载Actor详情失败:', error);
         alert('加载详情失败: ' + error.message);
@@ -225,7 +309,9 @@ async function viewActorDetail(id) {
 
 // 关闭Actor详情模态框
 function closeActorDetailModal() {
-    document.getElementById('actorDetailModal').style.display = 'none';
+    const modal = document.getElementById('actorDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 // 显示健康检查
@@ -237,20 +323,46 @@ async function showActorHealthCheck() {
         const healthData = result.data;
         
         const content = document.getElementById('healthCheckContent');
+        
+        const isHealthy = healthData.status === 'healthy';
+        const statusColor = isHealthy ? 'text-green-600' : 'text-red-600';
+        const statusBg = isHealthy ? 'bg-green-100' : 'bg-red-100';
+        const statusIcon = isHealthy ? '💚' : '❤️';
+        
         content.innerHTML = `
-            <div class="health-check">
-                <h4>系统健康状态</h4>
-                <div class="health-status">
-                    <p><strong>状态:</strong> <span class="status-${healthData.status}">${healthData.status}</span></p>
-                    <p><strong>活跃Actor数量:</strong> ${healthData.actors}</p>
-                    <p><strong>检查时间:</strong> ${healthData.timestamp}</p>
+            <div class="space-y-6">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">${statusIcon}</div>
+                    <h4 class="text-2xl font-bold ${statusColor} mb-2">系统${isHealthy ? '健康' : '异常'}</h4>
                 </div>
-                <h5>详细状态</h5>
-                <pre class="health-json">${JSON.stringify(healthData, null, 2)}</pre>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+                        <p class="text-3xl font-bold text-blue-600">${healthData.actors || 0}</p>
+                        <p class="text-sm text-gray-600 mt-1">活跃Actor数量</p>
+                    </div>
+                    <div class="${statusBg} p-4 rounded-lg text-center border ${isHealthy ? 'border-green-200' : 'border-red-200'}">
+                        <p class="text-3xl font-bold ${statusColor}">${healthData.status}</p>
+                        <p class="text-sm text-gray-600 mt-1">系统状态</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg text-center border border-purple-200">
+                        <p class="text-sm font-medium text-purple-600 break-all">${healthData.timestamp || '未知'}</p>
+                        <p class="text-sm text-gray-600 mt-1">检查时间</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-bold text-gray-900 mb-3">详细状态信息</h5>
+                    <div class="bg-gray-900 text-green-400 rounded-lg p-4 overflow-x-auto">
+                        <pre class="text-sm font-mono">${JSON.stringify(healthData, null, 2)}</pre>
+                    </div>
+                </div>
             </div>
         `;
         
-        document.getElementById('healthCheckModal').style.display = 'block';
+        const modal = document.getElementById('healthCheckModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     } catch (error) {
         console.error('健康检查失败:', error);
         alert('健康检查失败: ' + error.message);
@@ -259,7 +371,9 @@ async function showActorHealthCheck() {
 
 // 关闭健康检查模态框
 function closeHealthCheckModal() {
-    document.getElementById('healthCheckModal').style.display = 'none';
+    const modal = document.getElementById('healthCheckModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 // 点击模态框外部关闭

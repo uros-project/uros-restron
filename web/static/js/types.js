@@ -35,49 +35,60 @@ function renderTypes(types) {
 // 创建类型卡片
 function createTypeCard(type) {
     const card = document.createElement('div');
-    card.className = 'type-card';
+    card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
+    
+    const categoryColors = {
+        'person': 'bg-blue-100 text-blue-800',
+        'machine': 'bg-purple-100 text-purple-800',
+        'object': 'bg-green-100 text-green-800'
+    };
+    const categoryClass = categoryColors[type.category] || 'bg-gray-100 text-gray-800';
     
     const propertiesHtml = type.attributes && Object.keys(type.attributes).length > 0 
         ? Object.entries(type.attributes).map(([name, schema]) => 
-            `<div class="property-item">
-                <span class="property-name">${name}</span>
-                <span class="property-type">${schema.type || 'string'}</span>
+            `<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="text-sm font-medium text-gray-700">${name}</span>
+                <span class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded">${schema.type || 'string'}</span>
             </div>`
           ).join('')
-        : '<p style="color: #7f8c8d; font-style: italic;">暂无属性定义</p>';
+        : '<p class="text-gray-400 italic text-sm">暂无属性定义</p>';
 
     const featuresHtml = type.features && Object.keys(type.features).length > 0 
         ? Object.entries(type.features).map(([name, feature]) => {
             const properties = feature.properties || {};
             const propertiesList = Object.keys(properties).length > 0 
                 ? Object.entries(properties).map(([propName, propDef]) => 
-                    `<span class="feature-property">${propName}: ${propDef.type || 'any'}</span>`
+                    `<span class="text-xs text-gray-600">${propName}: ${propDef.type || 'any'}</span>`
                   ).join(', ')
                 : '无属性';
-            return `<div class="property-item">
-                <span class="property-name">${name}</span>
-                <span class="property-type">${propertiesList}</span>
+            return `<div class="flex items-start justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="text-sm font-medium text-gray-700">${name}</span>
+                <span class="text-xs text-gray-500">${propertiesList}</span>
             </div>`;
           }).join('')
-        : '<p style="color: #7f8c8d; font-style: italic;">暂无功能定义</p>';
+        : '<p class="text-gray-400 italic text-sm">暂无功能定义</p>';
 
     card.innerHTML = `
-        <div class="card-header">
-            <h3 class="card-title">${type.name}</h3>
-            <span class="card-category">${type.category}</span>
-        </div>
-        <p class="card-description">${type.description || '暂无描述'}</p>
-        <div class="card-properties">
-            <strong>属性模式:</strong>
-            ${propertiesHtml}
-        </div>
-        <div class="card-properties">
-            <strong>功能定义:</strong>
-            ${featuresHtml}
-        </div>
-        <div class="card-actions">
-            <button class="btn btn-secondary" onclick="editType('${type.id}')">编辑</button>
-            <button class="btn btn-danger" onclick="deleteType('${type.id}')">删除</button>
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-gray-900">${type.name}</h3>
+                <span class="px-3 py-1 ${categoryClass} rounded-full text-xs font-semibold">${type.category}</span>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">${type.description || '暂无描述'}</p>
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">属性模式:</p>
+                    ${propertiesHtml}
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">功能定义:</p>
+                    ${featuresHtml}
+                </div>
+            </div>
+            <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200">
+                <button onclick="editType('${type.id}')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">✏️ 编辑</button>
+                <button onclick="deleteType('${type.id}')" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-sm">🗑️ 删除</button>
+            </div>
         </div>
     `;
     
@@ -93,49 +104,53 @@ function filterTypes() {
 
 // 显示创建类型模态框
 function showCreateTypeModal() {
-    document.getElementById('createTypeModal').style.display = 'block';
+    const modal = document.getElementById('createTypeModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 }
 
 // 关闭创建类型模态框
 function closeCreateTypeModal() {
-    document.getElementById('createTypeModal').style.display = 'none';
+    const modal = document.getElementById('createTypeModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.getElementById('createTypeForm').reset();
     // 重置属性列表
     const attributesSchema = document.getElementById('attributesSchema');
     attributesSchema.innerHTML = `
-        <div class="property-item">
-            <input type="text" placeholder="属性名" class="property-name">
-            <select class="property-type">
+        <div class="flex gap-2">
+            <input type="text" placeholder="属性名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+            <select class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
                 <option value="string">字符串</option>
                 <option value="number">数字</option>
                 <option value="boolean">布尔值</option>
             </select>
-            <button type="button" onclick="removeProperty(this)">删除</button>
+            <button type="button" onclick="removeProperty(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
         </div>
     `;
     // 重置功能列表
     const featuresSchema = document.getElementById('featuresSchema');
     featuresSchema.innerHTML = `
-        <div class="feature-item">
-            <div class="feature-header">
-                <input type="text" placeholder="功能名" class="feature-name">
-                <input type="text" placeholder="功能描述" class="feature-description">
-                <button type="button" onclick="removeFeature(this)">删除</button>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div class="flex gap-2 mb-3">
+                <input type="text" placeholder="功能名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+                <input type="text" placeholder="功能描述" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+                <button type="button" onclick="removeFeature(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
             </div>
-            <div class="feature-properties">
-                <label class="feature-properties-label">功能属性:</label>
-                <div class="feature-property-list">
-                    <div class="feature-property-item">
-                        <input type="text" placeholder="属性名" class="feature-property-name">
-                        <select class="feature-property-type">
+            <div class="ml-4">
+                <label class="block text-sm font-medium text-gray-600 mb-2">功能属性:</label>
+                <div class="space-y-2 mb-2">
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="属性名" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
                             <option value="string">字符串</option>
                             <option value="number">数字</option>
                             <option value="boolean">布尔值</option>
                         </select>
-                        <button type="button" onclick="removeFeatureProperty(this)">删除</button>
+                        <button type="button" onclick="removeFeatureProperty(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">删除</button>
                     </div>
                 </div>
-                <button type="button" onclick="addFeatureProperty(this)" class="btn btn-small">添加属性</button>
+                <button type="button" onclick="addFeatureProperty(this)" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm">+ 添加属性</button>
             </div>
         </div>
     `;
@@ -145,15 +160,15 @@ function closeCreateTypeModal() {
 function addProperty() {
     const container = document.getElementById('attributesSchema');
     const propertyItem = document.createElement('div');
-    propertyItem.className = 'property-item';
+    propertyItem.className = 'flex gap-2';
     propertyItem.innerHTML = `
-        <input type="text" placeholder="属性名" class="property-name">
-        <select class="property-type">
+        <input type="text" placeholder="属性名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+        <select class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
             <option value="string">字符串</option>
             <option value="number">数字</option>
             <option value="boolean">布尔值</option>
         </select>
-        <button type="button" onclick="removeProperty(this)">删除</button>
+        <button type="button" onclick="removeProperty(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
     `;
     container.appendChild(propertyItem);
 }
@@ -170,27 +185,27 @@ function removeProperty(button) {
 function addFeature() {
     const container = document.getElementById('featuresSchema');
     const featureItem = document.createElement('div');
-    featureItem.className = 'feature-item';
+    featureItem.className = 'bg-gray-50 p-4 rounded-lg border border-gray-200';
     featureItem.innerHTML = `
-        <div class="feature-header">
-            <input type="text" placeholder="功能名" class="feature-name">
-            <input type="text" placeholder="功能描述" class="feature-description">
-            <button type="button" onclick="removeFeature(this)">删除</button>
+        <div class="flex gap-2 mb-3">
+            <input type="text" placeholder="功能名" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+            <input type="text" placeholder="功能描述" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 transition">
+            <button type="button" onclick="removeFeature(this)" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">删除</button>
         </div>
-        <div class="feature-properties">
-            <label class="feature-properties-label">功能属性:</label>
-            <div class="feature-property-list">
-                <div class="feature-property-item">
-                    <input type="text" placeholder="属性名" class="feature-property-name">
-                    <select class="feature-property-type">
+        <div class="ml-4">
+            <label class="block text-sm font-medium text-gray-600 mb-2">功能属性:</label>
+            <div class="space-y-2 mb-2">
+                <div class="flex gap-2">
+                    <input type="text" placeholder="属性名" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
+                    <select class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
                         <option value="string">字符串</option>
                         <option value="number">数字</option>
                         <option value="boolean">布尔值</option>
                     </select>
-                    <button type="button" onclick="removeFeatureProperty(this)">删除</button>
+                    <button type="button" onclick="removeFeatureProperty(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">删除</button>
                 </div>
             </div>
-            <button type="button" onclick="addFeatureProperty(this)" class="btn btn-small">添加属性</button>
+            <button type="button" onclick="addFeatureProperty(this)" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm">+ 添加属性</button>
         </div>
     `;
     container.appendChild(featureItem);
@@ -200,7 +215,7 @@ function addFeature() {
 function removeFeature(button) {
     const container = document.getElementById('featuresSchema');
     if (container.children.length > 1) {
-        button.closest('.feature-item').remove();
+        button.closest('div').remove();
     }
 }
 
@@ -208,15 +223,15 @@ function removeFeature(button) {
 function addFeatureProperty(button) {
     const propertyList = button.previousElementSibling;
     const propertyItem = document.createElement('div');
-    propertyItem.className = 'feature-property-item';
+    propertyItem.className = 'flex gap-2';
     propertyItem.innerHTML = `
-        <input type="text" placeholder="属性名" class="feature-property-name">
-        <select class="feature-property-type">
+        <input type="text" placeholder="属性名" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
+        <select class="px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 transition text-sm">
             <option value="string">字符串</option>
             <option value="number">数字</option>
             <option value="boolean">布尔值</option>
         </select>
-        <button type="button" onclick="removeFeatureProperty(this)">删除</button>
+        <button type="button" onclick="removeFeatureProperty(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">删除</button>
     `;
     propertyList.appendChild(propertyItem);
 }
@@ -237,10 +252,10 @@ document.getElementById('createTypeForm').addEventListener('submit', async funct
     const schema = {};
     
     // 收集属性模式
-    const propertyItems = document.querySelectorAll('#attributesSchema .property-item');
+    const propertyItems = document.querySelectorAll('#attributesSchema > div');
     propertyItems.forEach(item => {
-        const name = item.querySelector('.property-name').value.trim();
-        const type = item.querySelector('.property-type').value;
+        const name = item.querySelector('input[placeholder="属性名"]').value.trim();
+        const type = item.querySelector('select').value;
         if (name) {
             schema[name] = { type: type };
         }
@@ -248,17 +263,17 @@ document.getElementById('createTypeForm').addEventListener('submit', async funct
     
     // 收集功能定义
     const features = {};
-    const featureItems = document.querySelectorAll('#featuresSchema .feature-item');
+    const featureItems = document.querySelectorAll('#featuresSchema > div');
     featureItems.forEach(item => {
-        const name = item.querySelector('.feature-name').value.trim();
-        const description = item.querySelector('.feature-description').value.trim();
+        const name = item.querySelector('input[placeholder="功能名"]').value.trim();
+        const description = item.querySelector('input[placeholder="功能描述"]').value.trim();
         if (name) {
             // 收集功能属性
             const properties = {};
-            const propertyItems = item.querySelectorAll('.feature-property-item');
+            const propertyItems = item.querySelectorAll('.space-y-2 > div');
             propertyItems.forEach(propItem => {
-                const propName = propItem.querySelector('.feature-property-name').value.trim();
-                const propType = propItem.querySelector('.feature-property-type').value;
+                const propName = propItem.querySelector('input[placeholder="属性名"]').value.trim();
+                const propType = propItem.querySelector('select').value;
                 if (propName) {
                     properties[propName] = { type: propType };
                 }

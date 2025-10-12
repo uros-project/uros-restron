@@ -59,49 +59,53 @@ function renderThings(things) {
 // 创建事物卡片
 function createThingCard(thing) {
     const card = document.createElement('div');
-    card.className = 'thing-card';
+    card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200';
     
     const attributesHtml = thing.attributes && Object.keys(thing.attributes).length > 0 
         ? Object.entries(thing.attributes).map(([key, value]) => 
-            `<div class="property-item">
-                <span class="property-name">${key}</span>
-                <span class="property-type">${value}</span>
+            `<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="text-sm font-medium text-gray-700">${key}</span>
+                <span class="text-sm text-gray-600">${value}</span>
             </div>`
           ).join('')
-        : '<p style="color: #7f8c8d; font-style: italic;">暂无属性</p>';
+        : '<p class="text-gray-400 italic text-sm">暂无属性</p>';
 
     const featuresHtml = thing.features && Object.keys(thing.features).length > 0
         ? Object.entries(thing.features).map(([name, feature]) => {
             const properties = feature.properties || {};
             const propertiesList = Object.keys(properties).length > 0 
                 ? Object.entries(properties).map(([propName, propValue]) => 
-                    `<span class="feature-property">${propName}: ${propValue}</span>`
+                    `<span class="text-xs text-gray-600">${propName}: ${propValue}</span>`
                   ).join(', ')
                 : '无属性';
-            return `<div class="property-item">
-                <span class="property-name">${name}</span>
-                <span class="property-type">${propertiesList}</span>
+            return `<div class="flex items-start justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="text-sm font-medium text-gray-700">${name}</span>
+                <span class="text-xs text-gray-500">${propertiesList}</span>
             </div>`;
           }).join('')
-        : '<p style="color: #7f8c8d; font-style: italic;">暂无功能</p>';
+        : '<p class="text-gray-400 italic text-sm">暂无功能</p>';
 
     card.innerHTML = `
-        <div class="card-header">
-            <h3 class="card-title">${thing.name}</h3>
-            <span class="card-category">${thing.type}</span>
-        </div>
-        <p class="card-description">${thing.description || '暂无描述'}</p>
-        <div class="card-properties">
-            <strong>属性 (Attributes):</strong>
-            ${attributesHtml}
-        </div>
-        <div class="card-properties">
-            <strong>功能 (Features):</strong>
-            ${featuresHtml}
-        </div>
-        <div class="card-actions">
-            <button class="btn btn-secondary" onclick="viewThingDetail('${thing.id}')">查看详情</button>
-            <button class="btn btn-danger" onclick="deleteThing('${thing.id}')">删除</button>
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-gray-900">${thing.name}</h3>
+                <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-semibold">${thing.type}</span>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">${thing.description || '暂无描述'}</p>
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">属性 (Attributes):</p>
+                    ${attributesHtml}
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">功能 (Features):</p>
+                    ${featuresHtml}
+                </div>
+            </div>
+            <div class="flex gap-2 mt-6 pt-4 border-t border-gray-200">
+                <button onclick="viewThingDetail('${thing.id}')" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">📋 查看详情</button>
+                <button onclick="deleteThing('${thing.id}')" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-sm">🗑️ 删除</button>
+            </div>
         </div>
     `;
     
@@ -136,12 +140,16 @@ function searchThings() {
 
 // 显示创建事物模态框
 function showCreateThingModal() {
-    document.getElementById('createThingModal').style.display = 'block';
+    const modal = document.getElementById('createThingModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 }
 
 // 关闭创建事物模态框
 function closeCreateThingModal() {
-    document.getElementById('createThingModal').style.display = 'none';
+    const modal = document.getElementById('createThingModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
     document.getElementById('createThingForm').reset();
     document.getElementById('propertiesContainer').innerHTML = '';
 }
@@ -359,7 +367,9 @@ async function viewThingDetail(id) {
             </div>
         `;
         
-        document.getElementById('thingDetailModal').style.display = 'block';
+        const modal = document.getElementById('thingDetailModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     } catch (error) {
         console.error('加载事物详情失败:', error);
         alert('加载详情失败: ' + error.message);
@@ -368,7 +378,9 @@ async function viewThingDetail(id) {
 
 // 关闭事物详情模态框
 function closeThingDetailModal() {
-    document.getElementById('thingDetailModal').style.display = 'none';
+    const modal = document.getElementById('thingDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 // 删除事物
