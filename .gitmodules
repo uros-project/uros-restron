@@ -1,0 +1,3 @@
+[submodule "rosix"]
+	path = rosix
+	url = git@github.com:uos-projects/uos-rosix.git
